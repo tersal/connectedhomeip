@@ -260,9 +260,9 @@ void WriteHandler::DeliverListWriteBegin(const ConcreteAttributePath & aPath)
 
 void WriteHandler::DeliverListWriteEnd(const ConcreteAttributePath & aPath, bool writeWasSuccessful)
 {
-    if (auto * attrOverride = AttributeAccessInterfaceRegistry::Instance().Get(aPath.mEndpointId, aPath.mClusterId))
+    ///if (auto * attrOverride = AttributeAccessInterfaceRegistry::Instance().Get(aPath.mEndpointId, aPath.mClusterId))
     {
-        attrOverride->OnListWriteEnd(aPath, writeWasSuccessful);
+        mDataModelProvider->ListAttributeWriteNotification(aPath, writeWasSuccessful);
     }
 }
 

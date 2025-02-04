@@ -262,6 +262,15 @@ DataModel::ActionReturnStatus CodegenDataModelProvider::WriteAttribute(const Dat
     return CHIP_NO_ERROR;
 }
 
+DataModel::ActionReturnStatus CodegenDataModelProvider::ListAttributeWriteNotification(const ConcreteAttributePath & aPath, bool aWriteWasSuccessful) {
+    AttributeAccessInterface * aai =
+        AttributeAccessInterfaceRegistry::Instance().Get(aPath.mEndpointId, aPath.mClusterId);
+
+    aai->OnListWriteEnd(aPath, aWriteWasSuccessful);
+
+    return CHIP_NO_ERROR;
+}
+
 void CodegenDataModelProvider::Temporary_ReportAttributeChanged(const AttributePathParams & path)
 {
     ContextAttributesChangeListener change_listener(CurrentContext());

@@ -63,6 +63,7 @@ public:
                                                 AttributeValueEncoder & encoder) override;
     DataModel::ActionReturnStatus WriteAttribute(const DataModel::WriteAttributeRequest & request,
                                                  AttributeValueDecoder & decoder) override;
+    DataModel::ActionReturnStatus ListAttributeWriteNotification(const ConcreteAttributePath & aPath, bool aWriteWasSuccessful) override;
     std::optional<DataModel::ActionReturnStatus> Invoke(const DataModel::InvokeRequest & request, TLV::TLVReader & input_arguments,
                                                         CommandHandler * handler) override;
 

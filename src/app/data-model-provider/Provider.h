@@ -80,6 +80,9 @@ public:
     ///     - Validation of timed interaction required (also controlled by OperationFlags::kInternal)
     virtual ActionReturnStatus WriteAttribute(const WriteAttributeRequest & request, AttributeValueDecoder & decoder) = 0;
 
+    /// Test for WriteEnd
+    virtual ActionReturnStatus ListAttributeWriteNotification(const ConcreteAttributePath & aPath, bool aWriteWasSuccessful) = 0;
+
     /// `handler` is used to send back the reply.
     ///    - returning `std::nullopt` means that return value was placed in handler directly.
     ///      This includes cases where command handling and value return will be done asynchronously.
