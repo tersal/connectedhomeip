@@ -266,6 +266,12 @@ DataModel::ActionReturnStatus CodegenDataModelProvider::ListAttributeWriteNotifi
     AttributeAccessInterface * aai =
         AttributeAccessInterfaceRegistry::Instance().Get(aPath.mEndpointId, aPath.mClusterId);
 
+    if(aai == nullptr)
+    {
+        // What error to return?
+        return std::nullopt;
+    }
+
     aai->OnListWriteEnd(aPath, aWriteWasSuccessful);
 
     return CHIP_NO_ERROR;
