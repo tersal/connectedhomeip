@@ -250,10 +250,20 @@ exit:
     return err;
 }
 
+void WriteHandler::DeliverListWriteBegin(const ConcreteAttributePath & aPath)
+{
+    if (auto * attrOverride = AttributeAccessInterfaceRegistry::Instance().Get(aPath.mEndpointId, aPath.mClusterId))
+    {
+        attrOverride->OnListWriteBegin(aPath);
+    }
+}
+
 void WriteHandler::DeliverListWriteEnd(const ConcreteAttributePath & aPath, bool writeWasSuccessful)
 {
-    VerifyOrReturnError(mDataModelProvider != nullptr, CHIP_ERROR_INCORRECT_STATE);
-    mDataModelProvider->ListAttributeWriteNotification(aPath, writeWasSuccessful);
+    if (mDataModelProvider != nullptr)
+    {
+        mDataModelProvider->ListAttributeWriteNotification(aPath, writeWasSuccessful);
+    }
 }
 
 void WriteHandler::DeliverFinalListWriteEnd(bool writeWasSuccessful)
