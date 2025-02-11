@@ -273,20 +273,26 @@ DataModel::ActionReturnStatus CodegenDataModelProvider::WriteAttribute(const Dat
     return CHIP_NO_ERROR;
 }
 
-DataModel::ActionReturnStatus CodegenDataModelProvider::ListAttributeWriteNotification(const ConcreteAttributePath & aPath,
-                                                                                       bool aWriteWasSuccessful)
-{
-    AttributeAccessInterface * aai = AttributeAccessInterfaceRegistry::Instance().Get(aPath.mEndpointId, aPath.mClusterId);
+void CodegenDataModelProvider::ListAttributeWriteNotification(const ConcreteAttributePath & aPath, BitFlags<DataModel::ListWriteOperation> opType) {
+    AttributeAccessInterface * aai =
+        AttributeAccessInterfaceRegistry::Instance().Get(aPath.mEndpointId, aPath.mClusterId);
 
-    if (aai == nullptr)
+    if(aai != nullptr)
     {
-        // What error to return?
-        return Status::InvalidValue;
+        switch(opType)
+        {
+            case DataModel::ListWriteOperation::kListWriteBegin:
+                aai->OnListWriteBegin(aPath);
+                break;
+            case DataModel::ListWriteOperation::kListWriteEnd:
+                aai->OnListWriteEnd(aPath, false);
+                break;
+            case DataModel::ListWriteOperation::kListWriteEndFinal:
+                aai->OnListWriteEnd(aPath, true);
+                break;
+        }
     }
 
-    aai->OnListWriteEnd(aPath, aWriteWasSuccessful);
-
-    return CHIP_NO_ERROR;
 }
 
 void CodegenDataModelProvider::Temporary_ReportAttributeChanged(const AttributePathParams & path)

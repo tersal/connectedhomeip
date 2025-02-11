@@ -252,17 +252,18 @@ exit:
 
 void WriteHandler::DeliverListWriteBegin(const ConcreteAttributePath & aPath)
 {
-    if (auto * attrOverride = AttributeAccessInterfaceRegistry::Instance().Get(aPath.mEndpointId, aPath.mClusterId))
+    if(mDataModelProvider != nullptr)
     {
-        attrOverride->OnListWriteBegin(aPath);
+        mDataModelProvider->ListAttributeWriteNotification(aPath, DataModel::ListWriteOperation::kListWriteBegin);
     }
 }
 
 void WriteHandler::DeliverListWriteEnd(const ConcreteAttributePath & aPath, bool writeWasSuccessful)
 {
-    if (mDataModelProvider != nullptr)
+    if(mDataModelProvider != nullptr)
     {
-        mDataModelProvider->ListAttributeWriteNotification(aPath, writeWasSuccessful);
+        mDataModelProvider->ListAttributeWriteNotification(aPath, writeWasSuccessful ? 
+        DataModel::ListWriteOperation::kListWriteEndFinal : DataModel::ListWriteOperation::kListWriteEnd);
     }
 }
 

@@ -84,8 +84,13 @@ public:
     ///     - Validation of timed interaction required (also controlled by OperationFlags::kInternal)
     virtual ActionReturnStatus WriteAttribute(const WriteAttributeRequest & request, AttributeValueDecoder & decoder) = 0;
 
-    /// Test for WriteEnd
-    virtual ActionReturnStatus ListAttributeWriteNotification(const ConcreteAttributePath & aPath, bool aWriteWasSuccessful) = 0;
+    ///   Indicates the start/end of a series of list operations. This function will be called either before the first
+    ///   Write operation or after the last one of a series of consequence attribute data of the same attribute.
+    ///
+    ///   1) This function will be called if the client tries to set a nullable list attribute to null.
+    ///   2) This function will only be called once for a series of consequent attribute data (regardless the kind of list operation)
+    ///   of the same attribute.
+    virtual void ListAttributeWriteNotification(const ConcreteAttributePath & aPath, BitFlags<ListWriteOperation> opType) = 0;
 
     /// `handler` is used to send back the reply.
     ///    - returning `std::nullopt` means that return value was placed in handler directly.
