@@ -4774,7 +4774,7 @@ enum class ColorCapabilitiesBitmap : uint16_t
 // Bitmap for Feature
 enum class Feature : uint32_t
 {
-    kHueAndSaturation = 0x1,
+    kHueSaturation    = 0x1,
     kEnhancedHue      = 0x2,
     kColorLoop        = 0x4,
     kXy               = 0x8,

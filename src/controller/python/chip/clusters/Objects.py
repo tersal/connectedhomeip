@@ -33276,7 +33276,7 @@ class ColorControl(Cluster):
                 ClusterObjectFieldDescriptor(Label="enhancedCurrentHue", Tag=0x00004000, Type=typing.Optional[uint]),
                 ClusterObjectFieldDescriptor(Label="enhancedColorMode", Tag=0x00004001, Type=ColorControl.Enums.EnhancedColorModeEnum),
                 ClusterObjectFieldDescriptor(Label="colorLoopActive", Tag=0x00004002, Type=typing.Optional[uint]),
-                ClusterObjectFieldDescriptor(Label="colorLoopDirection", Tag=0x00004003, Type=typing.Optional[uint]),
+                ClusterObjectFieldDescriptor(Label="colorLoopDirection", Tag=0x00004003, Type=typing.Optional[ColorControl.Enums.ColorLoopDirectionEnum]),
                 ClusterObjectFieldDescriptor(Label="colorLoopTime", Tag=0x00004004, Type=typing.Optional[uint]),
                 ClusterObjectFieldDescriptor(Label="colorLoopStartEnhancedHue", Tag=0x00004005, Type=typing.Optional[uint]),
                 ClusterObjectFieldDescriptor(Label="colorLoopStoredEnhancedHue", Tag=0x00004006, Type=typing.Optional[uint]),
@@ -33335,7 +33335,7 @@ class ColorControl(Cluster):
     enhancedCurrentHue: typing.Optional[uint] = None
     enhancedColorMode: ColorControl.Enums.EnhancedColorModeEnum = 0
     colorLoopActive: typing.Optional[uint] = None
-    colorLoopDirection: typing.Optional[uint] = None
+    colorLoopDirection: typing.Optional[ColorControl.Enums.ColorLoopDirectionEnum] = None
     colorLoopTime: typing.Optional[uint] = None
     colorLoopStartEnhancedHue: typing.Optional[uint] = None
     colorLoopStoredEnhancedHue: typing.Optional[uint] = None
@@ -33442,7 +33442,7 @@ class ColorControl(Cluster):
             kColorTemperature = 0x10
 
         class Feature(IntFlag):
-            kHueAndSaturation = 0x1
+            kHueSaturation = 0x1
             kEnhancedHue = 0x2
             kColorLoop = 0x4
             kXy = 0x8
@@ -34607,9 +34607,9 @@ class ColorControl(Cluster):
 
             @ChipUtility.classproperty
             def attribute_type(cls) -> ClusterObjectFieldDescriptor:
-                return ClusterObjectFieldDescriptor(Type=typing.Optional[uint])
+                return ClusterObjectFieldDescriptor(Type=typing.Optional[ColorControl.Enums.ColorLoopDirectionEnum])
 
-            value: typing.Optional[uint] = None
+            value: typing.Optional[ColorControl.Enums.ColorLoopDirectionEnum] = None
 
         @dataclass
         class ColorLoopTime(ClusterAttributeDescriptor):

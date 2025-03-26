@@ -52,18 +52,6 @@
     /* Cluster: Window Covering, Attribute: Mode, Privilege: view */ \
     /* Cluster: Thermostat User Interface Configuration, Attribute: KeypadLockout, Privilege: view */ \
     /* Cluster: Thermostat User Interface Configuration, Attribute: ScheduleProgrammingVisibility, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: WhitePointX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: WhitePointY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointRX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointRY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointRIntensity, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointGX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointGY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointGIntensity, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointBX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointBY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointBIntensity, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: view */ \
 }
 
 // Parallel array data (cluster, *attribute*, privilege) for read attribute
@@ -91,18 +79,6 @@
     /* Cluster: Window Covering, Attribute: Mode, Privilege: view */ \
     /* Cluster: Thermostat User Interface Configuration, Attribute: KeypadLockout, Privilege: view */ \
     /* Cluster: Thermostat User Interface Configuration, Attribute: ScheduleProgrammingVisibility, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: WhitePointX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: WhitePointY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointRX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointRY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointRIntensity, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointGX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointGY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointGIntensity, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointBX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointBY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointBIntensity, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: view */ \
 }
 
 // Parallel array data (cluster, attribute, *privilege*) for read attribute
@@ -130,18 +106,6 @@
     /* Cluster: Window Covering, Attribute: Mode, Privilege: view */ \
     /* Cluster: Thermostat User Interface Configuration, Attribute: KeypadLockout, Privilege: view */ \
     /* Cluster: Thermostat User Interface Configuration, Attribute: ScheduleProgrammingVisibility, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: WhitePointX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: WhitePointY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointRX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointRY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointRIntensity, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointGX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointGY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointGIntensity, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointBX, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointBY, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: ColorPointBIntensity, Privilege: view */ \
-    /* Cluster: Color Control, Attribute: StartUpColorTemperatureMireds, Privilege: view */ \
 }
 
 ////////////////////////////////////////////////////////////////////////////////
