@@ -12178,7 +12178,7 @@ class AdministratorCommissioning(Cluster):
             # enum value. This specific value should never be transmitted.
             kUnknownEnumValue = 3
 
-        class StatusCode(MatterIntEnum):
+        class StatusCodeEnum(MatterIntEnum):
             kBusy = 0x02
             kPAKEParameterError = 0x03
             kWindowNotOpen = 0x04

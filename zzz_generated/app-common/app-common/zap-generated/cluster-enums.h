@@ -1887,8 +1887,8 @@ enum class CommissioningWindowStatusEnum : uint8_t
     kUnknownEnumValue = 3,
 };
 
-// Enum for StatusCode
-enum class StatusCode : uint8_t
+// Enum for StatusCodeEnum
+enum class StatusCodeEnum : uint8_t
 {
     kBusy               = 0x02,
     kPAKEParameterError = 0x03,

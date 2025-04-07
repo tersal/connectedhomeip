@@ -1620,9 +1620,9 @@ static auto __attribute__((unused)) EnsureKnownEnumValue(AdministratorCommission
         return EnumType::kUnknownEnumValue;
     }
 }
-static auto __attribute__((unused)) EnsureKnownEnumValue(AdministratorCommissioning::StatusCode val)
+static auto __attribute__((unused)) EnsureKnownEnumValue(AdministratorCommissioning::StatusCodeEnum val)
 {
-    using EnumType = AdministratorCommissioning::StatusCode;
+    using EnumType = AdministratorCommissioning::StatusCodeEnum;
     switch (val)
     {
     case EnumType::kBusy:
