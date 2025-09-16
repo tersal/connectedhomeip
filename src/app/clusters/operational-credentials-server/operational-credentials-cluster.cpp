@@ -147,9 +147,118 @@ NodeOperationalCertStatusEnum ConvertToNOCResponseStatus(CHIP_ERROR err)
 void SendNOCResponse(app::CommandHandler * commandObj, const ConcreteCommandPath & path, NodeOperationalCertStatusEnum status,
                      uint8_t index, const CharSpan & debug_text)
 {
-    Commands::NOCResponse::Type payload;
-    payload.statusCode = status;
-    if (status == NodeOperationalCertStatusEnum::kOk)
+    MATTER_TRACE_SCOPE("AddNOC", "OperationalCredentials");
+    auto & NOCValue          = commandData.NOCValue;
+    auto & ICACValue         = commandData.ICACValue;
+    auto & adminVendorId     = commandData.adminVendorId;
+    auto & ipkValue          = commandData.IPKValue;
+    auto * groupDataProvider = Credentials::GetGroupDataProvider();
+    auto nocResponse         = NodeOperationalCertStatusEnum::kOk;
+    auto nonDefaultStatus    = Status::Success;
+    bool needRevert          = false;
+
+    CHIP_ERROR err             = CHIP_NO_ERROR;
+    FabricIndex newFabricIndex = kUndefinedFabricIndex;
+    Credentials::GroupDataProvider::KeySet keyset;
+    const FabricInfo * newFabricInfo = nullptr;
+    auto & fabricTable               = Server::GetInstance().GetFabricTable();
+
+    auto * secureSession   = commandObj->GetExchangeContext()->GetSessionHandle()->AsSecureSession();
+    auto & failSafeContext = Server::GetInstance().GetFailSafeContext();
+
+    uint8_t compressed_fabric_id_buffer[sizeof(uint64_t)];
+    MutableByteSpan compressed_fabric_id(compressed_fabric_id_buffer);
+
+    bool csrWasForUpdateNoc = false; //< Output param of HasPendingOperationalKey
+    bool hasPendingKey      = fabricTable.HasPendingOperationalKey(csrWasForUpdateNoc);
+
+    ChipLogProgress(Zcl, "OpCreds: Received an AddNOC command");
+
+    VerifyOrExit(NOCValue.size() <= Credentials::kMaxCHIPCertLength, nonDefaultStatus = Status::InvalidCommand);
+    VerifyOrExit(!ICACValue.HasValue() || ICACValue.Value().size() <= Credentials::kMaxCHIPCertLength,
+                 nonDefaultStatus = Status::InvalidCommand);
+    VerifyOrExit(ipkValue.size() == Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES, nonDefaultStatus = Status::InvalidCommand);
+    VerifyOrExit(IsVendorIdValidOperationally(adminVendorId), nonDefaultStatus = Status::InvalidCommand);
+
+    VerifyOrExit(failSafeContext.IsFailSafeArmed(commandObj->GetAccessingFabricIndex()),
+                 nonDefaultStatus = Status::FailsafeRequired);
+
+    VerifyOrExit(!failSafeContext.NocCommandHasBeenInvoked(), nonDefaultStatus = Status::ConstraintError);
+
+    // Must have had a previous CSR request, not tagged for UpdateNOC
+    VerifyOrExit(hasPendingKey, nocResponse = NodeOperationalCertStatusEnum::kMissingCsr);
+    VerifyOrExit(!csrWasForUpdateNoc, nonDefaultStatus = Status::ConstraintError);
+
+    // Internal error that would prevent IPK from being added
+    VerifyOrExit(groupDataProvider != nullptr, nonDefaultStatus = Status::Failure);
+
+    // Flush acks before really slow work
+    commandObj->FlushAcksRightAwayOnSlowCommand();
+
+    // We can't possibly have a matching root based on the fact that we don't have
+    // a shared root store. Therefore we would later fail path validation due to
+    // missing root. Let's early-bail with InvalidNOC.
+    VerifyOrExit(failSafeContext.AddTrustedRootCertHasBeenInvoked(), nocResponse = NodeOperationalCertStatusEnum::kInvalidNOC);
+
+    // Check this explicitly before adding the fabric so we don't need to back out changes if this is an error.
+    VerifyOrExit(IsOperationalNodeId(commandData.caseAdminSubject) || IsCASEAuthTag(commandData.caseAdminSubject),
+                 nocResponse = NodeOperationalCertStatusEnum::kInvalidAdminSubject);
+
+#if CHIP_DEVICE_CONFIG_ENABLE_JOINT_FABRIC
+    // These checks should only run during JCM.
+    if (Server::GetInstance().GetCommissioningWindowManager().IsJCM())
+    {
+        // NOC must contain an Administrator CAT
+        CATValues cats;
+        err = ExtractCATsFromOpCert(NOCValue, cats);
+        VerifyOrExit(err == CHIP_NO_ERROR && cats.ContainsIdentifier(kAdminCATIdentifier),
+                     nocResponse = NodeOperationalCertStatusEnum::kInvalidNOC);
+
+        // CaseAdminSubject must contain an Anchor CAT
+        CASEAuthTag tag = CASEAuthTagFromNodeId(commandData.caseAdminSubject);
+        VerifyOrExit(IsCASEAuthTag(commandData.caseAdminSubject) && IsValidCASEAuthTag(tag) &&
+                         (GetCASEAuthTagIdentifier(tag) == kAnchorCATIdentifier),
+                     nocResponse = NodeOperationalCertStatusEnum::kInvalidAdminSubject);
+    }
+#endif // CHIP_DEVICE_CONFIG_ENABLE_JOINT_FABRIC
+
+    err = fabricTable.AddNewPendingFabricWithOperationalKeystore(NOCValue, ICACValue.ValueOr(ByteSpan{}), adminVendorId,
+                                                                 &newFabricIndex);
+    VerifyOrExit(err == CHIP_NO_ERROR, nocResponse = ConvertToNOCResponseStatus(err));
+
+    // From here if we error-out, we should revert the fabric table pending updates
+    needRevert = true;
+
+    newFabricInfo = fabricTable.FindFabricWithIndex(newFabricIndex);
+    VerifyOrExit(newFabricInfo != nullptr, nonDefaultStatus = Status::Failure);
+
+    // Set the Identity Protection Key (IPK)
+    // The IPK SHALL be the operational group key under GroupKeySetID of 0
+    keyset.keyset_id                = Credentials::GroupDataProvider::kIdentityProtectionKeySetId;
+    keyset.policy                   = GroupKeyManagement::GroupKeySecurityPolicyEnum::kTrustFirst;
+    keyset.num_keys_used            = 1;
+    keyset.epoch_keys[0].start_time = 0;
+    memcpy(keyset.epoch_keys[0].key, ipkValue.data(), Crypto::CHIP_CRYPTO_SYMMETRIC_KEY_LENGTH_BYTES);
+
+    err = newFabricInfo->GetCompressedFabricIdBytes(compressed_fabric_id);
+    VerifyOrExit(err == CHIP_NO_ERROR, nonDefaultStatus = Status::Failure);
+
+    err = groupDataProvider->SetKeySet(newFabricIndex, compressed_fabric_id, keyset);
+    VerifyOrExit(err == CHIP_NO_ERROR, nocResponse = ConvertToNOCResponseStatus(err));
+
+    /**
+     * . If the current secure session was established with PASE,
+     *   the receiver SHALL:
+     *     .. Augment the secure session context with the `FabricIndex` generated above
+     *        such that subsequent interactions have the proper accessing fabric.
+     *
+     * . If the current secure session was established with CASE, subsequent configuration
+     *   of the newly installed Fabric requires the opening of a new CASE session from the
+     *   Administrator from the Fabric just installed. This Administrator is the one listed
+     *   in the `caseAdminSubject` argument.
+     *
+     */
+    if (secureSession->GetSecureSessionType() == SecureSession::Type::kPASE)
     {
         payload.fabricIndex.SetValue(index);
         payload.fabricIndex.Emplace(index);

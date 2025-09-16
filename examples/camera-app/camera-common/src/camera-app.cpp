@@ -16,6 +16,7 @@
  *    limitations under the License.
  */
 #include "camera-app.h"
+#include "tls-certificate-management-instance.h"
 #include "tls-client-management-instance.h"
 #include <app/clusters/push-av-stream-transport-server/CodegenIntegration.h>
 
@@ -47,9 +48,11 @@ CameraApp::CameraApp(chip::EndpointId aClustersEndpoint, CameraDeviceInterface *
 
     Clusters::PushAvStreamTransport::SetDelegate(mEndpoint, &(mCameraDevice->GetPushAVTransportDelegate()));
 
-    Clusters::PushAvStreamTransport::SetTLSClientManagementDelegate(chip::EndpointId(1),
+    Clusters::PushAvStreamTransport::SetTLSClientManagementDelegate(mEndpoint,
                                                                     &Clusters::TlsClientManagementCommandDelegate::GetInstance());
 
+    Clusters::PushAvStreamTransport::SetTlsCertificateManagementDelegate(
+        mEndpoint, &Clusters::TlsCertificateManagementCommandDelegate::getInstance());
     // Fetch all initialization parameters for CameraAVStreamMgmt Server
     BitFlags<CameraAvStreamManagement::Feature> avsmFeatures;
     BitFlags<CameraAvStreamManagement::OptionalAttribute> avsmOptionalAttrs;
@@ -159,7 +162,8 @@ CameraApp::CameraApp(chip::EndpointId aClustersEndpoint, CameraDeviceInterface *
         CameraAvSettingsUserLevelManagement::OptionalAttributes::kTiltMin,
         CameraAvSettingsUserLevelManagement::OptionalAttributes::kTiltMax,
         CameraAvSettingsUserLevelManagement::OptionalAttributes::kPanMin,
-        CameraAvSettingsUserLevelManagement::OptionalAttributes::kPanMax);
+        CameraAvSettingsUserLevelManagement::OptionalAttributes::kPanMax,
+        CameraAvSettingsUserLevelManagement::OptionalAttributes::kMovementState);
     const uint8_t appMaxPresets = 5;
 
     // Instantiate the CameraAVSettingsUserLevelMgmt Server
@@ -263,6 +267,7 @@ void CameraApp::InitCameraDeviceClusters()
 {
     // Initialize Cluster Servers
     mWebRTCTransportProviderPtr->Init();
+    mCameraDevice->GetWebRTCProviderController().SetWebRTCTransportProvider(std::move(mWebRTCTransportProviderPtr));
 
     mChimeServerPtr->Init();
 
@@ -271,6 +276,13 @@ void CameraApp::InitCameraDeviceClusters()
     InitializeCameraAVStreamMgmt();
 
     mZoneMgmtServerPtr->Init();
+}
+
+void CameraApp::ShutdownCameraDeviceClusters()
+{
+    ChipLogDetail(Camera, "CameraAppShutdown: Shutting down Camera device clusters");
+    mAVSettingsUserLevelMgmtServerPtr->Shutdown();
+    mWebRTCTransportProviderPtr->Shutdown();
 }
 
 static constexpr EndpointId kCameraEndpointId = 1;
@@ -288,5 +300,6 @@ void CameraAppInit(CameraDeviceInterface * cameraDevice)
 void CameraAppShutdown()
 {
     ChipLogDetail(Camera, "CameraAppShutdown: Shutting down Camera app");
+    gCameraApp.get()->ShutdownCameraDeviceClusters();
     gCameraApp = nullptr;
 }
