@@ -106,6 +106,7 @@ structs_sources = [
   "${chip_root}/src/controller/java/generated/java/chip/devicecontroller/cluster/structs/EnergyPreferenceClusterBalanceStruct.kt",
   "${chip_root}/src/controller/java/generated/java/chip/devicecontroller/cluster/structs/FixedLabelClusterLabelStruct.kt",
   "${chip_root}/src/controller/java/generated/java/chip/devicecontroller/cluster/structs/GeneralCommissioningClusterBasicCommissioningInfo.kt",
+  "${chip_root}/src/controller/java/generated/java/chip/devicecontroller/cluster/structs/GeneralDiagnosticsClusterDeviceLoadStruct.kt",
   "${chip_root}/src/controller/java/generated/java/chip/devicecontroller/cluster/structs/GeneralDiagnosticsClusterNetworkInterface.kt",
   "${chip_root}/src/controller/java/generated/java/chip/devicecontroller/cluster/structs/GroupKeyManagementClusterGroupInfoMapStruct.kt",
   "${chip_root}/src/controller/java/generated/java/chip/devicecontroller/cluster/structs/GroupKeyManagementClusterGroupKeyMapStruct.kt",

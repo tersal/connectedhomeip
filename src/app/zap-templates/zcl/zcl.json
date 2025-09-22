@@ -325,6 +325,7 @@
             "UpTime",
             "TotalOperationalHours",
             "BootReason",
+            "DeviceLoadStatus",
             "FeatureMap",
             "ClusterRevision"
         ],
