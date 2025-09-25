@@ -92,7 +92,6 @@ ClustersWithInitFunctions:
     - Sample MEI
     - Scenes Management
     - Thermostat
-    - Operational Credentials
     - Fixed Label
 
 ClustersWithAttributeChangedFunctions:
@@ -113,7 +112,6 @@ ClustersWithShutdownFunctions:
     - Sample MEI
     - Scenes Management
     - Thermostat
-    - Operational Credentials
     - Fixed Label
 
 ClustersWithPreAttributeChangeFunctions:
@@ -144,3 +142,4 @@ CodeDrivenClusters:
     - Software Diagnostics
     - Time Format Localization
     - Wi-Fi Network Diagnostics
+    - Operational Credentials
