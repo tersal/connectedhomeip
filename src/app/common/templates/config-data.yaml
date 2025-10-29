@@ -78,6 +78,7 @@ CommandHandlerInterfaceOnlyClusters:
     - Thread Border Router Management
     - Thread Network Directory
     - User Label
+    - Valve Configuration and Control
     - Water Heater Management
     - Water Heater Mode
     - WebRTC Transport Provider
@@ -164,5 +165,6 @@ CodeDrivenClusters:
     - Software Diagnostics
     - Time Format Localization
     - User Label
+    - Valve Configuration and Control
     - Wi-Fi Network Diagnostics
     # keep-sorted end
