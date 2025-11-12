@@ -1,6 +1,6 @@
 /**
  *
- *    Copyright (c) 2023 Project CHIP Authors
+ *    Copyright (c) 2025 Project CHIP Authors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -32,7 +32,7 @@ using namespace chip::app::Clusters::ValveConfigurationAndControl;
 using chip::Protocols::InteractionModel::Status;
 
 ValveConfigurationAndControlCluster::ValveConfigurationAndControlCluster(EndpointId endpoint, BitFlags<ValveConfigurationAndControl::Feature> features, OptionalAttributeSet optionalAttributeSet) :
-    DefaultServerCluster( {endpoint, ValveConfigurationAndControl::Id }), mFeatures(features), mOptionalAttributeSet(optionalAttributeSet)
+    DefaultServerCluster( {endpoint, ValveConfigurationAndControl::Id }), mFeatures(features), mOptionalAttributeSet(optionalAttributeSet), mDelegate(nullptr)
 {
     
 }
@@ -126,6 +126,7 @@ DataModel::ActionReturnStatus ValveConfigurationAndControlCluster::WriteAttribut
 
 DataModel::ActionReturnStatus ValveConfigurationAndControlCluster::WriteImpl(const DataModel::WriteAttributeRequest & request, AttributeValueDecoder & decoder)
 {
+
     if(request.path.mAttributeId == ValveConfigurationAndControl::Attributes::DefaultOpenDuration::Id)
     {
         DataModel::Nullable<uint32_t> defaultOpenDuration;
@@ -137,11 +138,8 @@ DataModel::ActionReturnStatus ValveConfigurationAndControlCluster::WriteImpl(con
 
     if(request.path.mAttributeId == ValveConfigurationAndControl::Attributes::DefaultOpenLevel::Id)
     {
-        Percent defaultOpenLvel;
-        ReturnErrorOnFailure(decoder.Decode(defaultOpenLvel));
-        VerifyOrReturnValue(defaultOpenLvel != mDefaultOpenLevel, DataModel::ActionReturnStatus::FixedStatus::kWriteSuccessNoOp);
-        mDefaultOpenLevel = defaultOpenLvel;
-        return mContext->attributeStorage.WriteValue(request.path, { reinterpret_cast<const uint8_t *>(&mDefaultOpenLevel), sizeof(mDefaultOpenLevel) });
+        AttributePersistence persistence{ mContext->attributeStorage };
+        return persistence.DecodeAndStoreNativeEndianValue(request.path, decoder, mDefaultOpenLevel);
     }
 
     return Protocols::InteractionModel::Status::UnsupportedWrite;
@@ -247,9 +245,9 @@ CHIP_ERROR ValveConfigurationAndControlCluster::HandleCloseInternal()
     BitMask<ValveFaultBitmap> faults;
     if (mFeatures.Has(Feature::kLevel))
     {
-        Percent currentLevel;
+        Percent currentLevel = 0;
         
-        SaveAndReportIfChanged(mTargetLevel, static_cast<u_char>(0), Attributes::TargetLevel::Id);
+        SaveAndReportIfChanged(mTargetLevel, Percent(0), Attributes::TargetLevel::Id);
         SaveAndReportIfChanged(mTargetState, DataModel::Nullable<ValveStateEnum>(ValveStateEnum::kClosed), Attributes::TargetState::Id);
         SaveAndReportIfChanged(mCurrentState, DataModel::Nullable<ValveStateEnum>(ValveStateEnum::kTransitioning), Attributes::CurrentState::Id);
 
@@ -275,7 +273,8 @@ CHIP_ERROR ValveConfigurationAndControlCluster::HandleCloseInternal()
     }
     else
     {
-        ValveStateEnum state;
+        ValveStateEnum state = ValveStateEnum::kUnknownEnumValue;
+
         SaveAndReportIfChanged(mTargetState, DataModel::Nullable<ValveStateEnum>(ValveStateEnum::kClosed), Attributes::TargetState::Id);
         SaveAndReportIfChanged(mCurrentState, DataModel::Nullable<ValveStateEnum>(ValveStateEnum::kTransitioning), Attributes::CurrentState::Id);
 
@@ -401,7 +400,7 @@ CHIP_ERROR ValveConfigurationAndControlCluster::HandleOpenLevel(const Optional<P
     return CHIP_NO_ERROR;
 }
 
-CHIP_ERROR ValveConfigurationAndControlCluster::GetRealTargetLevel(const Optional<Percent> & targetLevel, Percent & realTargetLevel)
+CHIP_ERROR ValveConfigurationAndControlCluster::GetRealTargetLevel(const Optional<Percent> & targetLevel, Percent & realTargetLevel) const
 {
     if(!targetLevel.HasValue())
     {
@@ -420,7 +419,7 @@ CHIP_ERROR ValveConfigurationAndControlCluster::GetRealTargetLevel(const Optiona
     return CHIP_NO_ERROR;
 }
 
-bool ValveConfigurationAndControlCluster::ValueCompliesWithLevelStep(const uint8_t value)
+bool ValveConfigurationAndControlCluster::ValueCompliesWithLevelStep(const uint8_t value) const
 {
     if (mOptionalAttributeSet.IsSet(Attributes::LevelStep::Id))
     {

@@ -29,7 +29,6 @@
 #include <app/cluster-building-blocks/QuieterReporting.h>
 #include <system/SystemLayer.h>
 
-using namespace chip::app::Clusters::ValveConfigurationAndControl;
 namespace chip::app::Clusters {
 class ValveConfigurationAndControlCluster : public DefaultServerCluster {
 public:
@@ -51,7 +50,7 @@ public:
                                                                TLV::TLVReader & input_arguments, CommandHandler * handler) override;
 
     // Weird functions
-    CHIP_ERROR SetDelegate(DelegateBase * delegate);
+    CHIP_ERROR SetDelegate(ValveConfigurationAndControl::DelegateBase * delegate);
     static void HandleUpdateRemainingDuration(System::Layer * systemLayer, void * context); 
 
 private:
@@ -60,8 +59,8 @@ private:
     std::optional<DataModel::ActionReturnStatus> HandleCloseCommand(const DataModel::InvokeRequest & request, TLV::TLVReader & input_arguments, CommandHandler * handler);
     CHIP_ERROR HandleOpenLevel(const Optional<Percent> & targetLevel);
     CHIP_ERROR HandleOpenNoLevel();
-    CHIP_ERROR GetRealTargetLevel(const Optional<Percent> & targetLevel, Percent & realTargetLevel);
-    bool ValueCompliesWithLevelStep(const uint8_t value);
+    CHIP_ERROR GetRealTargetLevel(const Optional<Percent> & targetLevel, Percent & realTargetLevel) const;
+    bool ValueCompliesWithLevelStep(const uint8_t value) const;
     void HandleUpdateRemainingDurationInternal();
     CHIP_ERROR SetRemainingDuration(const DataModel::Nullable<ElapsedS> & remainingDuration);
     CHIP_ERROR HandleCloseInternal();
@@ -91,10 +90,10 @@ private:
     uint8_t mLevelStep = 1u;
     const BitFlags<ValveConfigurationAndControl::Feature> mFeatures;
     const OptionalAttributeSet mOptionalAttributeSet;
-    DelegateBase * mDelegate;
+    ValveConfigurationAndControl::DelegateBase * mDelegate;
     // Check these things
     System::Clock::Milliseconds64 mDurationStarted = System::Clock::Milliseconds64(0);
-    const System::Clock::Milliseconds64 kRemainingDurationReportRate =
+    static constexpr System::Clock::Milliseconds64 kRemainingDurationReportRate =
         std::chrono::duration_cast<System::Clock::Milliseconds64>(System::Clock::Seconds64(1));
 };
 }
