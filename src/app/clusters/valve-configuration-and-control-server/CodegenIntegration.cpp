@@ -38,6 +38,14 @@ constexpr size_t kValveConfigurationAndControlMaxClusterCount =
 
 LazyRegisteredServerCluster<ValveConfigurationAndControlCluster> gServers[kValveConfigurationAndControlMaxClusterCount];
 
+class CodegenTimeSyncTracker : public TimeSyncTracker {
+    public:
+    int GetGranularity() override {
+        return 0;
+    }
+};
+
+CodegenTimeSyncTracker codegenTracker;
 class IntegrationDelegate : public CodegenClusterIntegration::Delegate
 {
 public:
@@ -47,7 +55,7 @@ public:
         // Create OptionalAttributeSet from optionalAttributeBits
         ValveConfigurationAndControlCluster::OptionalAttributeSet optionalAttributeSet(optionalAttributeBits);
 
-        gServers[clusterInstanceIndex].Create(endpointId, BitFlags<ValveConfigurationAndControl::Feature>(featureMap), optionalAttributeSet);
+        gServers[clusterInstanceIndex].Create(endpointId, BitFlags<ValveConfigurationAndControl::Feature>(featureMap), optionalAttributeSet, &codegenTracker);
         return gServers[clusterInstanceIndex].Registration();
     }
 

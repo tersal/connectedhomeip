@@ -22,6 +22,7 @@
 #pragma once
 
 #include "valve-configuration-and-control-delegate.h"
+#include "TimeSyncTracker.h"
 
 #include <clusters/ValveConfigurationAndControl/Metadata.h>
 #include <app/server-cluster/DefaultServerCluster.h>
@@ -36,7 +37,7 @@ public:
         ValveConfigurationAndControl::Attributes::DefaultOpenLevel::Id, ValveConfigurationAndControl::Attributes::ValveFault::Id,
         ValveConfigurationAndControl::Attributes::LevelStep::Id>;
     
-    ValveConfigurationAndControlCluster(EndpointId endpointId, BitFlags<ValveConfigurationAndControl::Feature> features, OptionalAttributeSet optionalAttributeSet);
+    ValveConfigurationAndControlCluster(EndpointId endpointId, BitFlags<ValveConfigurationAndControl::Feature> features, OptionalAttributeSet optionalAttributeSet, TimeSyncTracker * tsTracker);
 
     // Server cluster implementation
     DataModel::ActionReturnStatus ReadAttribute(const DataModel::ReadAttributeRequest & request,
@@ -67,7 +68,7 @@ private:
     System::Clock::Milliseconds64 GetNextReportTimeForRemainingDuration();
 
     template <typename T, typename U>
-    void SaveAndReportIfChanged(T& currentValue, const U & newValue, chip::AttributeId attributeId)
+    inline void SaveAndReportIfChanged(T& currentValue, const U & newValue, chip::AttributeId attributeId)
     {
         if(currentValue != newValue)
         {
@@ -91,6 +92,7 @@ private:
     const BitFlags<ValveConfigurationAndControl::Feature> mFeatures;
     const OptionalAttributeSet mOptionalAttributeSet;
     ValveConfigurationAndControl::DelegateBase * mDelegate;
+    TimeSyncTracker * mTsTracker;
     // Check these things
     System::Clock::Milliseconds64 mDurationStarted = System::Clock::Milliseconds64(0);
     static constexpr System::Clock::Milliseconds64 kRemainingDurationReportRate =

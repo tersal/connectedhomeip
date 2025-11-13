@@ -31,8 +31,8 @@ using namespace chip::app::Clusters;
 using namespace chip::app::Clusters::ValveConfigurationAndControl;
 using chip::Protocols::InteractionModel::Status;
 
-ValveConfigurationAndControlCluster::ValveConfigurationAndControlCluster(EndpointId endpoint, BitFlags<ValveConfigurationAndControl::Feature> features, OptionalAttributeSet optionalAttributeSet) :
-    DefaultServerCluster( {endpoint, ValveConfigurationAndControl::Id }), mFeatures(features), mOptionalAttributeSet(optionalAttributeSet), mDelegate(nullptr)
+ValveConfigurationAndControlCluster::ValveConfigurationAndControlCluster(EndpointId endpoint, BitFlags<ValveConfigurationAndControl::Feature> features, OptionalAttributeSet optionalAttributeSet, TimeSyncTracker * tsTracker) :
+    DefaultServerCluster( {endpoint, ValveConfigurationAndControl::Id }), mFeatures(features), mOptionalAttributeSet(optionalAttributeSet), mDelegate(nullptr), mTsTracker(tsTracker)
 {
     
 }
@@ -167,6 +167,11 @@ std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster
     //   - if this value is supplied, check against levelStep, error if not OK, otherwise set targetLevel
     Commands::Open::DecodableType commandData;
     ReturnErrorOnFailure(commandData.Decode(input_arguments));
+
+    if(mTsTracker == nullptr) 
+    {
+        ChipLogError(Zcl, "TimeSync tracker error");
+    } 
 
     if(!mFeatures.Has(Feature::kLevel) && commandData.targetLevel.HasValue())
     {
