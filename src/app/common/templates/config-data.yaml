@@ -78,6 +78,7 @@ CommandHandlerInterfaceOnlyClusters:
     - TLS Client Management
     - Thread Border Router Management
     - Thread Network Directory
+    - Time Synchronization
     - User Label
     - Valve Configuration and Control
     - Water Heater Management
@@ -166,6 +167,7 @@ CodeDrivenClusters:
     - Push AV Stream Transport
     - Software Diagnostics
     - Time Format Localization
+    - Time Synchronization
     - User Label
     - Valve Configuration and Control
     - Wi-Fi Network Diagnostics
