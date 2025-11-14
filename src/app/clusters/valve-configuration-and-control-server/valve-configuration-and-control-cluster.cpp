@@ -168,14 +168,26 @@ std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster
     Commands::Open::DecodableType commandData;
     ReturnErrorOnFailure(commandData.Decode(input_arguments));
 
-    if(mTsTracker == nullptr) 
-    {
-        ChipLogError(Zcl, "TimeSync tracker error");
-    } 
+    
 
-    if(!mFeatures.Has(Feature::kLevel) && commandData.targetLevel.HasValue())
+    if(mFeatures.Has(Feature::kTimeSync))
     {
-        return Status::ConstraintError;
+        ReturnValueOnFailure(mTsTracker != nullptr, Status::InvalidInState);
+
+        if(commandData.openDuration.HasValue() && mTsTracker->GetGranularity() != TimeSynchronization::GranularityEnum::kNoTimeGranularity)
+        {
+            System::Clock::Microseconds64 utcTime;
+            uint64_t chipEpochTime;
+            ReturnErrorOnFailure(System::SystemClock().GetClock_RealTime(utcTime));
+            VerifyOrReturnError(UnixEpochToChipEpochMicros(utcTime.count(), chipEpochTime), CHIP_ERROR_INVALID_TIME);
+
+            uint64_t time = commandData.openDuration.Value().Value() * chip::kMicrosecondsPerSecond;
+            SaveAndReportIfChanged(mAutoCloseTime, DataModel::Nullable<uint32_t>(time), Attributes::AutoCloseTime::Id);
+        }
+        else
+        {
+            SaveAndReportIfChanged(mAutoCloseTime, DataModel::NullNullable, Attributes::AutoCloseTime::Id);
+        }
     }
 
     if(mFeatures.Has(Feature::kLevel))
@@ -196,6 +208,14 @@ std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster
     return Status::Success;
 }
 
+void ValveConfigurationAndControlCluster::UpdateAutoCloseTime(uint64_t time)
+{
+    if (!mRemainingDuration.value().IsNull() && mRemainingDuration.value().Value() != 0)
+    {
+        uint64_t closingTime = mRemainingDuration.value().Value() * chip::kMicrosecondsPerSecond + time;
+        SaveAndReportIfChanged(mAutoCloseTime, DataModel::Nullable<uint32_t>(closingTime), Attributes::AutoCloseTime::Id);
+    }
+}
 void ValveConfigurationAndControlCluster::HandleUpdateRemainingDuration(System::Layer * systemLayer, void * context)
 {
     auto * logic = static_cast<ValveConfigurationAndControlCluster *>(context);
@@ -269,6 +289,7 @@ CHIP_ERROR ValveConfigurationAndControlCluster::HandleCloseInternal()
                 SaveAndReportIfChanged(mCurrentState, DataModel::Nullable<ValveStateEnum>(ValveStateEnum::kClosed), Attributes::CurrentState::Id);
                 SaveAndReportIfChanged(mTargetState, DataModel::NullNullable, Attributes::TargetState::Id);
                 SaveAndReportIfChanged(mTargetLevel, DataModel::NullNullable, Attributes::TargetLevel::Id);
+                SaveAndReportIfChanged(mAutoCloseTime, DataModel::NullNullable, Attributes::AutoCloseTime::Id);
             }
             else
             {

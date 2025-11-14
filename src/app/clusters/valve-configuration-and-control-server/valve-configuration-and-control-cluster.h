@@ -65,6 +65,7 @@ private:
     void HandleUpdateRemainingDurationInternal();
     CHIP_ERROR SetRemainingDuration(const DataModel::Nullable<ElapsedS> & remainingDuration);
     CHIP_ERROR HandleCloseInternal();
+    void UpdateAutoCloseTime(uint64_t time);
     System::Clock::Milliseconds64 GetNextReportTimeForRemainingDuration();
 
     template <typename T, typename U>

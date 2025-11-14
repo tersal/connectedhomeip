@@ -17,13 +17,15 @@
 #pragma once
 #include <cstdint>
 
+#include <app/clusters/time-synchronization-server/time-synchronization-cluster.h>
+
 namespace chip::app::Clusters {
 
 class TimeSyncTracker
 {
 public:
     virtual ~TimeSyncTracker()               = default;
-    virtual int GetGranularity() = 0;
+    virtual TimeSynchronization::GranularityEnum GetGranularity() = 0;
 };
 
 } // namespace chip::app::Clusters

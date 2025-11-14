@@ -22,6 +22,7 @@
 #include <app/util/attribute-storage.h>
 #include <data-model-providers/codegen/ClusterIntegration.h>
 #include <data-model-providers/codegen/CodegenDataModelProvider.h>
+#include <app/clusters/time-synchronization-server/CodegenIntegration.h>
 
 using namespace chip;
 using namespace chip::app;
@@ -40,8 +41,16 @@ LazyRegisteredServerCluster<ValveConfigurationAndControlCluster> gServers[kValve
 
 class CodegenTimeSyncTracker : public TimeSyncTracker {
     public:
-    int GetGranularity() override {
-        return 0;
+    TimeSynchronization::GranularityEnum GetGranularity() override {
+        TimeSynchronizationCluster * tsCluster = TimeSynchronization::GetClusterInstance();
+
+        if(tsCluster == nullptr)
+        {
+            ChipLogError(Zcl, "Null pointer");
+            return TimeSynchronization::GranularityEnum::kUnknownEnumValue;
+        }
+
+        return tsCluster->GetGranularity();
     }
 };
 
