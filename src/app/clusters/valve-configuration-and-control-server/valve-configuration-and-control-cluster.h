@@ -51,22 +51,27 @@ public:
                                                                TLV::TLVReader & input_arguments, CommandHandler * handler) override;
 
     // Weird functions
-    CHIP_ERROR SetDelegate(ValveConfigurationAndControl::DelegateBase * delegate);
-    static void HandleUpdateRemainingDuration(System::Layer * systemLayer, void * context); 
+    CHIP_ERROR SetDelegate(ValveConfigurationAndControl::Delegate * delegate);
+    static void HandleUpdateRemainingDuration(System::Layer * systemLayer, void * context);
+
+    CHIP_ERROR CloseValve();
+    CHIP_ERROR UpdateCurrentLevel(chip::Percent currentLevel);
+    CHIP_ERROR UpdateCurrentState(ValveConfigurationAndControl::ValveStateEnum currentState);
+    CHIP_ERROR EmitValveFault(chip::BitMask<ValveConfigurationAndControl::ValveFaultBitmap> fault);
 
 private:
     DataModel::ActionReturnStatus WriteImpl(const DataModel::WriteAttributeRequest & request, AttributeValueDecoder & decoder);
     std::optional<DataModel::ActionReturnStatus> HandleOpenCommand(const DataModel::InvokeRequest & request, TLV::TLVReader & input_arguments, CommandHandler * handler);
-    std::optional<DataModel::ActionReturnStatus> HandleCloseCommand(const DataModel::InvokeRequest & request, TLV::TLVReader & input_arguments, CommandHandler * handler);
-    CHIP_ERROR HandleOpenLevel(const Optional<Percent> & targetLevel);
-    CHIP_ERROR HandleOpenNoLevel();
-    CHIP_ERROR GetRealTargetLevel(const Optional<Percent> & targetLevel, Percent & realTargetLevel) const;
+    std::optional<DataModel::ActionReturnStatus> HandleCloseCommand();
+    CHIP_ERROR GetAdjustedTargetLevel(const Optional<Percent> & targetLevel, DataModel::Nullable<chip::Percent> & adjustedTargetLevel) const;
     bool ValueCompliesWithLevelStep(const uint8_t value) const;
     void HandleUpdateRemainingDurationInternal();
     CHIP_ERROR SetRemainingDuration(const DataModel::Nullable<ElapsedS> & remainingDuration);
-    CHIP_ERROR HandleCloseInternal();
     void UpdateAutoCloseTime(uint64_t time);
+    CHIP_ERROR SetAutoCloseTime();
     System::Clock::Milliseconds64 GetNextReportTimeForRemainingDuration();
+    void emitValveChangeEvent(ValveConfigurationAndControl::ValveStateEnum currentState);
+    void emitValveLevelEvent(chip::Percent currentLevel);
 
     template <typename T, typename U>
     inline void SaveAndReportIfChanged(T& currentValue, const U & newValue, chip::AttributeId attributeId)
@@ -81,8 +86,8 @@ private:
     //Attributes
     DataModel::Nullable<uint32_t> mOpenDuration = DataModel::NullNullable;
     DataModel::Nullable<uint32_t> mDefaultOpenDuration = DataModel::NullNullable;
-    DataModel::Nullable<uint32_t> mAutoCloseTime = DataModel::NullNullable;
-    QuieterReportingAttribute<uint32_t> mRemainingDuration = QuieterReportingAttribute<uint32_t>();
+    DataModel::Nullable<uint64_t> mAutoCloseTime = DataModel::NullNullable;
+    QuieterReportingAttribute<uint32_t> mRemainingDuration { DataModel::NullNullable };
     DataModel::Nullable<ValveConfigurationAndControl::ValveStateEnum> mCurrentState = DataModel::NullNullable;
     DataModel::Nullable<ValveConfigurationAndControl::ValveStateEnum> mTargetState = DataModel::NullNullable;
     DataModel::Nullable<Percent> mCurrentLevel = DataModel::NullNullable;
@@ -92,7 +97,7 @@ private:
     uint8_t mLevelStep = 1u;
     const BitFlags<ValveConfigurationAndControl::Feature> mFeatures;
     const OptionalAttributeSet mOptionalAttributeSet;
-    ValveConfigurationAndControl::DelegateBase * mDelegate;
+    ValveConfigurationAndControl::Delegate * mDelegate;
     TimeSyncTracker * mTsTracker;
     // Check these things
     System::Clock::Milliseconds64 mDurationStarted = System::Clock::Milliseconds64(0);

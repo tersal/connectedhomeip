@@ -41,16 +41,17 @@ LazyRegisteredServerCluster<ValveConfigurationAndControlCluster> gServers[kValve
 
 class CodegenTimeSyncTracker : public TimeSyncTracker {
     public:
-    TimeSynchronization::GranularityEnum GetGranularity() override {
-        TimeSynchronizationCluster * tsCluster = TimeSynchronization::GetClusterInstance();
 
-        if(tsCluster == nullptr)
+    bool IsTimeSyncClusterSupported() override {
+        return (nullptr != TimeSynchronization::GetClusterInstance());
+    }
+
+    bool IsValidUTCTime() override {
+        if(IsTimeSyncClusterSupported())
         {
-            ChipLogError(Zcl, "Null pointer");
-            return TimeSynchronization::GranularityEnum::kUnknownEnumValue;
+            return TimeSynchronization::GetClusterInstance()->GetGranularity() != TimeSynchronization::GranularityEnum::kNoTimeGranularity;
         }
-
-        return tsCluster->GetGranularity();
+        return false;
     }
 };
 
@@ -121,7 +122,7 @@ void MatterValveConfigurationAndControlPluginServerShutdownCallback()
 
 namespace chip::app::Clusters::ValveConfigurationAndControl {
 
-void SetDelegate(EndpointId endpointId,  DelegateBase * delegate)
+void SetDelegate(EndpointId endpointId,  Delegate * delegate)
 {
     IntegrationDelegate integrationDelegate;
 
@@ -137,6 +138,22 @@ void SetDelegate(EndpointId endpointId,  DelegateBase * delegate)
     VerifyOrReturn(interface != nullptr);
 
     static_cast<ValveConfigurationAndControlCluster *>(interface)->SetDelegate(delegate);
+}
+
+ValveConfigurationAndControlCluster * FindClusterOnEndpoint(EndpointId endpointId)
+{
+    IntegrationDelegate integrationDelegate;
+
+    ServerClusterInterface * booleanState = CodegenClusterIntegration::FindClusterOnEndpoint(
+        {
+            .endpointId                = endpointId,
+            .clusterId                 = ValveConfigurationAndControl::Id,
+            .fixedClusterInstanceCount = kValveConfigurationAndControlFixedClusterCount,
+            .maxClusterInstanceCount   = kValveConfigurationAndControlMaxClusterCount,
+        },
+        integrationDelegate);
+
+    return static_cast<ValveConfigurationAndControlCluster *>(booleanState);
 }
 
 } // namespace chip::app::Clusters::ValveConfigurationAndControl

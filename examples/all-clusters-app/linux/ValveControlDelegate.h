@@ -25,13 +25,12 @@ namespace app {
 namespace Clusters {
 namespace ValveConfigurationAndControl {
 
-class ValveControlDelegate : public LevelControlDelegate
+class ValveControlDelegate : public Delegate
 {
 public:
-    CHIP_ERROR HandleOpenValve(const Percent targetLevel, Percent & currentLevel,
-                                       BitMask<ValveFaultBitmap> & valveFault) override;
-    CHIP_ERROR HandleCloseValve(Percent & currentLevel, BitMask<ValveFaultBitmap> & valveFault) override;
-    Percent GetCurrentValveLevel() override;
+    DataModel::Nullable<chip::Percent> HandleOpenValve(DataModel::Nullable<chip::Percent> level) override;
+    CHIP_ERROR HandleCloseValve() override;
+    void HandleRemainingDurationTick(uint32_t duration) override;
 };
 
 } // namespace ValveConfigurationAndControl

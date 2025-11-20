@@ -25,7 +25,8 @@ class TimeSyncTracker
 {
 public:
     virtual ~TimeSyncTracker()               = default;
-    virtual TimeSynchronization::GranularityEnum GetGranularity() = 0;
+    virtual bool IsTimeSyncClusterSupported() = 0;
+    virtual bool IsValidUTCTime() = 0;
 };
 
 } // namespace chip::app::Clusters

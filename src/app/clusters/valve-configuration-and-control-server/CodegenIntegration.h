@@ -4,6 +4,8 @@
 
 namespace chip::app::Clusters::ValveConfigurationAndControl {
 
-void SetDelegate(EndpointId endpointId,  DelegateBase * delegate);
+void SetDelegate(EndpointId endpointId,  Delegate * delegate);
+
+ValveConfigurationAndControlCluster * FindClusterOnEndpoint(EndpointId endpointId);
 
 } // namespace chip::app::Clusters::ValveConfigurationAndControl
