@@ -1,6 +1,6 @@
 /**
  *
- *    Copyright (c) 2025 Project CHIP Authors
+ *    Copyright (c) 2023-2025 Project CHIP Authors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ CHIP_ERROR ValveConfigurationAndControlCluster::Startup(ServerClusterContext & c
     // This feature shall not be supported if the cluster don't supports the TimeSync cluster.
     if(mFeatures.Has(Feature::kTimeSync))
     {
-        VerifyOrReturnError((mTsTracker != nullptr && !mTsTracker->IsTimeSyncClusterSupported()), CHIP_ERROR_INVALID_ARGUMENT);
+        VerifyOrReturnError((mTsTracker != nullptr && mTsTracker->IsTimeSyncClusterSupported()), CHIP_ERROR_INVALID_ARGUMENT);
     }
 
     // The RemainingDuration attribute shall be reported when:
@@ -276,8 +276,8 @@ CHIP_ERROR ValveConfigurationAndControlCluster::CloseValve()
 std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster::HandleOpenCommand(const DataModel::InvokeRequest & request, TLV::TLVReader & input_arguments, CommandHandler * handler)
 {
     Commands::Open::DecodableType commandData;
-    DataModel::Nullable<chip::Percent> openTargetLevel = DataModel::NullNullable;
-    DataModel::Nullable<chip::Percent> openCurrentLevel = DataModel::NullNullable;
+    DataModel::Nullable<chip::Percent> openTargetLevel;
+    DataModel::Nullable<chip::Percent> openCurrentLevel;
 
     ReturnErrorOnFailure(commandData.Decode(input_arguments));
 
@@ -337,7 +337,11 @@ std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster
     if(mFeatures.Has(Feature::kLevel))
     {
         SaveAndReportIfChanged(mTargetLevel, openTargetLevel, Attributes::TargetLevel::Id);
-        UpdateCurrentLevel(openCurrentLevel.Value());
+
+        if(!openCurrentLevel.IsNull())
+        {
+            UpdateCurrentLevel(openCurrentLevel.Value());
+        }
     }
 
     // Start countdown if applicable (e.g. OpenDuration is not Null).
