@@ -54,10 +54,10 @@ CHIP_ERROR ValveConfigurationAndControlCluster::Startup(ServerClusterContext & c
     mRemainingDuration.policy().Set(QuieterReportingPolicyEnum::kMarkDirtyOnChangeToFromZero).Set(QuieterReportingPolicyEnum::kMarkDirtyOnIncrement);
 
     // Try to get the stored value for the DefaultOpenDuration attribute.
-    MutableByteSpan defaultCalendarBytes(reinterpret_cast<uint8_t *>(&mDefaultOpenDuration), sizeof(mDefaultOpenDuration));
+    MutableByteSpan defaultOpenDurationBytes(reinterpret_cast<uint8_t *>(&mDefaultOpenDuration), sizeof(mDefaultOpenDuration));
     const DataModel::Nullable<uint32_t> defaultOpenDuration = mDefaultOpenDuration;
     if(context.attributeStorage.ReadValue({ mPath.mEndpointId, ValveConfigurationAndControl::Id, ValveConfigurationAndControl::Attributes::DefaultOpenDuration::Id }, 
-        defaultCalendarBytes) != CHIP_NO_ERROR)
+        defaultOpenDurationBytes) != CHIP_NO_ERROR)
     {
         mDefaultOpenDuration = defaultOpenDuration;
     }
