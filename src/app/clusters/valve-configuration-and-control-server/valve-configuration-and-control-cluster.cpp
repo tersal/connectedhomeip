@@ -34,7 +34,44 @@ using chip::Protocols::InteractionModel::Status;
 ValveConfigurationAndControlCluster::ValveConfigurationAndControlCluster(EndpointId endpoint, BitFlags<ValveConfigurationAndControl::Feature> features, OptionalAttributeSet optionalAttributeSet, TimeSyncTracker * tsTracker) :
     DefaultServerCluster( {endpoint, ValveConfigurationAndControl::Id }), mFeatures(features), mOptionalAttributeSet(optionalAttributeSet), mDelegate(nullptr), mTsTracker(tsTracker)
 {
+
+}
+
+CHIP_ERROR ValveConfigurationAndControlCluster::Startup(ServerClusterContext & context)
+{
+    ReturnErrorOnFailure(DefaultServerCluster::Startup(context));
+
+    // This feature shall not be supported if the cluster don't supports the TimeSync cluster.
+    if(mFeatures.Has(Feature::kTimeSync))
+    {
+        VerifyOrReturnError((mTsTracker != nullptr && !mTsTracker->IsTimeSyncClusterSupported()), CHIP_ERROR_INVALID_ARGUMENT);
+    }
+
+    // The RemainingDuration attribute shall be reported when:
+    // - It changes from Null or  vice versa (default handling for QuieterReportingAttribute)
+    // - It changes to 0
+    // - It increases. 
     mRemainingDuration.policy().Set(QuieterReportingPolicyEnum::kMarkDirtyOnChangeToFromZero).Set(QuieterReportingPolicyEnum::kMarkDirtyOnIncrement);
+
+    // Try to get the stored value for the DefaultOpenDuration attribute.
+    MutableByteSpan defaultCalendarBytes(reinterpret_cast<uint8_t *>(&mDefaultOpenDuration), sizeof(mDefaultOpenDuration));
+    const DataModel::Nullable<uint32_t> defaultOpenDuration = mDefaultOpenDuration;
+    if(context.attributeStorage.ReadValue({ mPath.mEndpointId, ValveConfigurationAndControl::Id, ValveConfigurationAndControl::Attributes::DefaultOpenDuration::Id }, 
+        defaultCalendarBytes) != CHIP_NO_ERROR)
+    {
+        mDefaultOpenDuration = defaultOpenDuration;
+    }
+
+    // If enabled Level feature is enabled, try to get the DefaultOpenLevel value.
+    if(mFeatures.Has(Feature::kLevel))
+    {
+        AttributePersistence attrPersistence{ context.attributeStorage };
+        Percent defaultOpenLevel = mDefaultOpenLevel;
+        attrPersistence.LoadNativeEndianValue({mPath.mEndpointId, ValveConfigurationAndControl::Id, ValveConfigurationAndControl::Attributes::DefaultOpenLevel::Id },
+                                               mDefaultOpenLevel, defaultOpenLevel);
+    }
+
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR ValveConfigurationAndControlCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
@@ -170,7 +207,7 @@ std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster
     switch (request.path.mCommandId)
     {
     case ValveConfigurationAndControl::Commands::Close::Id:
-        return HandleCloseCommand();
+        return HandleCloseCommand(request, handler);
     case ValveConfigurationAndControl::Commands::Open::Id:
         return HandleOpenCommand(request, input_arguments, handler);
     default:
@@ -179,9 +216,18 @@ std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster
 }
 
 // Command Handlers
-std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster::HandleCloseCommand()
+std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster::HandleCloseCommand(const DataModel::InvokeRequest & request, CommandHandler * handler)
 {
+    // Cancel time if running.
     DeviceLayer::SystemLayer().CancelTimer(HandleUpdateRemainingDuration, this);
+
+    // Check if there is any Fault registered
+    if(mValveFault.HasAny())
+    {
+        handler->AddClusterSpecificFailure(request.path, to_underlying(StatusCodeEnum::kFailureDueToFault));
+        return std::nullopt;
+    }
+
     return CloseValve();
 }
 
@@ -229,18 +275,6 @@ CHIP_ERROR ValveConfigurationAndControlCluster::CloseValve()
 
 std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster::HandleOpenCommand(const DataModel::InvokeRequest & request, TLV::TLVReader & input_arguments, CommandHandler * handler)
 {
-    // openDuration
-    // - if this is omitted, fall back to defaultOpenDuration
-    // - if this is NULL, remaining duration is NULL
-    // - if this is a value, use that value
-    // - if remaining duration is not null and TS is supported, set the autoCloseTime as appropriate
-    // targetLevel
-    // - if LVL is not supported
-    //   - if this is omitted, that's correct
-    //   - if this is supplied return error
-    // - if LVL is supported
-    //   - if this value is not supplied, use defaultOpenLevel if supported, otherwise 100
-    //   - if this value is supplied, check against levelStep, error if not OK, otherwise set targetLevel
     Commands::Open::DecodableType commandData;
     DataModel::Nullable<chip::Percent> openTargetLevel = DataModel::NullNullable;
     DataModel::Nullable<chip::Percent> openCurrentLevel = DataModel::NullNullable;
@@ -253,9 +287,6 @@ std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster
         handler->AddClusterSpecificFailure(request.path, to_underlying(StatusCodeEnum::kFailureDueToFault));
         return std::nullopt;
     }
-    
-
-    // Check if TimeSync cluster exists and if the feature is enabled.
 
     // Set the states accordingly, TargetState to Open and CurrentState to Transitioning
     SaveAndReportIfChanged(mTargetState, DataModel::Nullable<ValveStateEnum>(ValveStateEnum::kOpen), Attributes::TargetState::Id);
@@ -290,9 +321,6 @@ std::optional<DataModel::ActionReturnStatus> ValveConfigurationAndControlCluster
     {
         ReturnErrorOnFailure(SetAutoCloseTime());
     }
-
-    // Save the time when the Open command was received.
-    mDurationStarted = System::SystemClock().GetMonotonicMilliseconds64();
 
     // Check rules for TargetLevel if enabled
     if(mFeatures.Has(Feature::kLevel))
@@ -361,19 +389,19 @@ void ValveConfigurationAndControlCluster::HandleUpdateRemainingDurationInternal(
     // We will start a new timer if required.
     DeviceLayer::SystemLayer().CancelTimer(HandleUpdateRemainingDuration, this);
 
-    if (mOpenDuration.IsNull())
+    if (mOpenDuration.IsNull() || mRemainingDuration.value().IsNull())
     {
-        // If openDuration is NULL, this timer shouldn't be on.
+        // If openDuration is NULL, RemainingDuration should also be Null and this timer should't be running.
         SetRemainingDuration(DataModel::NullNullable);
         return;
     }
 
-    // TODO: Do we really need to use a Delegate call for each tick?
     if(mDelegate != nullptr)
     {
         mDelegate->HandleRemainingDurationTick(mRemainingDuration.value().Value());
     }
 
+    // Check the value of RemainingDuration, when reaches 0 the valve shall be closed.
     if(mRemainingDuration.value().Value() > 0)
     {
         (void) DeviceLayer::SystemLayer().StartTimer(System::Clock::Seconds16(1), HandleUpdateRemainingDuration, this);
@@ -389,8 +417,7 @@ void ValveConfigurationAndControlCluster::HandleUpdateRemainingDurationInternal(
 CHIP_ERROR ValveConfigurationAndControlCluster::SetRemainingDuration(const DataModel::Nullable<ElapsedS> & remainingDuration)
 {
     System::Clock::Milliseconds64 now = System::SystemClock().GetMonotonicMilliseconds64();
-    AttributeDirtyState dirtyState    = mRemainingDuration.SetValue(
-        remainingDuration, now, mRemainingDuration.GetPredicateForSufficientTimeSinceLastDirty(kRemainingDurationReportRate));
+    AttributeDirtyState dirtyState    = mRemainingDuration.SetValue(remainingDuration, now);
     if (dirtyState == AttributeDirtyState::kMustReport)
     {
         NotifyAttributeChanged(Attributes::RemainingDuration::Id);
@@ -474,7 +501,6 @@ CHIP_ERROR ValveConfigurationAndControlCluster::UpdateCurrentLevel(chip::Percent
     return CHIP_NO_ERROR;
 }
 
-// TODO: Probably join the ValveLevel and ValveStatus events in one report?
 void ValveConfigurationAndControlCluster::emitValveLevelEvent(chip::Percent currentLevel)
 {
     ValveConfigurationAndControl::Events::ValveStateChanged::Type event;
