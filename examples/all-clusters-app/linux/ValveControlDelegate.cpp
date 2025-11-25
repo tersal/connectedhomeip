@@ -48,6 +48,7 @@ CHIP_ERROR ValveControlDelegate::HandleCloseValve()
     sLastOpenDuration = 0;
     sLevel            = 0;
     auto valveCluster = ValveConfigurationAndControl::FindClusterOnEndpoint(kValveEndpoint);
+    VerifyOrReturnError(valveCluster != nullptr, CHIP_ERROR_UNINITIALIZED);
     ReturnErrorOnFailure(valveCluster->UpdateCurrentLevel(sLevel));
     ChipLogProgress(NotSpecified, "Valve closed");
     return CHIP_NO_ERROR;
@@ -58,6 +59,7 @@ void ValveControlDelegate::HandleRemainingDurationTick(uint32_t duration)
     ChipLogProgress(NotSpecified, "Valve remaining duration ticking: %dsec level: %d duration %d", duration, sLevel,
                     sLastOpenDuration);
     auto valveCluster = ValveConfigurationAndControl::FindClusterOnEndpoint(kValveEndpoint);
+    VerifyOrReturn(valveCluster != nullptr);
     if (sLastOpenDuration == 0)
     {
         VerifyOrReturn(CHIP_NO_ERROR == valveCluster->UpdateCurrentLevel(sLevel),
@@ -71,5 +73,7 @@ void ValveControlDelegate::HandleRemainingDurationTick(uint32_t duration)
 
 void ExtendedTimeSyncDelegate::UTCTimeAvailabilityChanged(uint64_t time)
 {
-
+    auto valveCluster = ValveConfigurationAndControl::FindClusterOnEndpoint(kValveEndpoint);
+    VerifyOrReturn(valveCluster != nullptr);
+    valveCluster->UpdateAutoCloseTime(time);
 }

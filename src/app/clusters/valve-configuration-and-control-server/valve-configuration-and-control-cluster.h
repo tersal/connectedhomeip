@@ -58,6 +58,7 @@ public:
     CHIP_ERROR UpdateCurrentLevel(chip::Percent currentLevel);
     CHIP_ERROR UpdateCurrentState(ValveConfigurationAndControl::ValveStateEnum currentState);
     CHIP_ERROR EmitValveFault(chip::BitMask<ValveConfigurationAndControl::ValveFaultBitmap> fault);
+    void UpdateAutoCloseTime(uint64_t time);
 
 private:
     DataModel::ActionReturnStatus WriteImpl(const DataModel::WriteAttributeRequest & request, AttributeValueDecoder & decoder);
@@ -67,7 +68,6 @@ private:
     bool ValueCompliesWithLevelStep(const uint8_t value) const;
     void HandleUpdateRemainingDurationInternal();
     CHIP_ERROR SetRemainingDuration(const DataModel::Nullable<ElapsedS> & remainingDuration);
-    void UpdateAutoCloseTime(uint64_t time);
     CHIP_ERROR SetAutoCloseTime();
     void emitValveChangeEvent(ValveConfigurationAndControl::ValveStateEnum currentState);
     void emitValveLevelEvent(chip::Percent currentLevel);
