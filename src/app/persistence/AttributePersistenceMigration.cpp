@@ -13,7 +13,7 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
                                                        MutableByteSpan & buffer)
 {
     ChipError err        = CHIP_NO_ERROR;
-    
+
     if (attributes.size() > 1)
     {
         // We make a copy of the buffer so it can be resized
