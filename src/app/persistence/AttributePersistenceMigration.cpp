@@ -12,7 +12,7 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
                                                        Span<const std::pair<const AttributeId, SafeAttributeMigrator>> attributes,
                                                        MutableByteSpan & buffer)
 {
-    ChipError err        = CHIP_NO_ERROR;
+    ChipError err = CHIP_NO_ERROR;
 
     if (attributes.size() > 1)
     {

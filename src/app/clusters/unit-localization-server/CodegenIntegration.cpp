@@ -110,11 +110,12 @@ UnitLocalizationClusterWithMigration::UnitLocalizationClusterWithMigration(Endpo
 
 CHIP_ERROR UnitLocalizationClusterWithMigration::Startup(ServerClusterContext & context)
 {
-    static constexpr AttrMigrationData attributesToUpdate[] = { { UnitLocalization::Attributes::TemperatureUnit::Id, &DefaultMigrators::ScalarValue<uint8_t> } };
+    static constexpr AttrMigrationData attributesToUpdate[] = { { UnitLocalization::Attributes::TemperatureUnit::Id,
+                                                                  &DefaultMigrators::ScalarValue<uint8_t> } };
     ReturnErrorOnFailure(MigrateFromSafeAttributePersistenceProvider(mPath, Span(attributesToUpdate), context.storage));
     return UnitLocalizationCluster::Startup(context);
 }
 
-}
+} // namespace chip::app::Clusters
 
 void MatterUnitLocalizationPluginServerInitCallback() {}
