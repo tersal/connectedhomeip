@@ -18,6 +18,7 @@
 
 #include <app/clusters/unit-localization-server/CodegenIntegration.h>
 #include <app/clusters/unit-localization-server/UnitLocalizationCluster.h>
+#include <app/persistence/AttributePersistenceMigration.h>
 #include <app/static-cluster-config/UnitLocalization.h>
 #include <clusters/UnitLocalization/Ids.h>
 #include <data-model-providers/codegen/ClusterIntegration.h>
@@ -98,6 +99,22 @@ void MatterUnitLocalizationClusterShutdownCallback(chip::EndpointId endpointId, 
             .maxClusterInstanceCount   = 1,
         },
         integrationDelegate, shutdownType);
+}
+
+namespace chip::app::Clusters {
+
+UnitLocalizationClusterWithMigration::UnitLocalizationClusterWithMigration(EndpointId endpointId,
+                                                                           BitFlags<UnitLocalization::Feature> feature) :
+    UnitLocalizationCluster(endpointId, feature)
+{}
+
+CHIP_ERROR UnitLocalizationClusterWithMigration::Startup(ServerClusterContext & context)
+{
+    static constexpr AttrMigrationData attributesToUpdate[] = { { UnitLocalization::Attributes::TemperatureUnit::Id, &DefaultMigrators::ScalarValue<uint8_t> } };
+    ReturnErrorOnFailure(MigrateFromSafeAttributePersistenceProvider(mPath, Span(attributesToUpdate), context.storage));
+    return UnitLocalizationCluster::Startup(context);
+}
+
 }
 
 void MatterUnitLocalizationPluginServerInitCallback() {}
