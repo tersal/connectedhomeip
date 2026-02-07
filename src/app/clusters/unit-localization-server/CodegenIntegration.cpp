@@ -112,7 +112,7 @@ CHIP_ERROR UnitLocalizationClusterWithMigration::Startup(ServerClusterContext & 
 {
     static constexpr AttrMigrationData attributesToUpdate[] = { { UnitLocalization::Attributes::TemperatureUnit::Id,
                                                                   &DefaultMigrators::ScalarValue<uint8_t> } };
-    ReturnErrorOnFailure(MigrateFromSafeAttributePersistenceProvider(mPath, Span(attributesToUpdate), context.storage));
+    ReturnErrorOnFailure(MigrateFromSafeAttributePersistenceProvider<16>(mPath, Span(attributesToUpdate), context.storage));
     return UnitLocalizationCluster::Startup(context);
 }
 
