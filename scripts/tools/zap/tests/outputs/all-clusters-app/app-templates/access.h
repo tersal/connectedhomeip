@@ -42,7 +42,6 @@
     /* Cluster: User Label, Attribute: LabelList, Privilege: view */ \
     /* Cluster: Energy Preference, Attribute: CurrentEnergyBalance, Privilege: view */ \
     /* Cluster: Energy Preference, Attribute: CurrentLowPowerModeSensitivity, Privilege: view */ \
-    /* Cluster: Window Covering, Attribute: Mode, Privilege: view */ \
     /* Cluster: Color Control, Attribute: WhitePointX, Privilege: view */ \
     /* Cluster: Color Control, Attribute: WhitePointY, Privilege: view */ \
     /* Cluster: Color Control, Attribute: ColorPointRX, Privilege: view */ \
@@ -72,7 +71,6 @@
     /* Cluster: User Label, Attribute: LabelList, Privilege: view */ \
     /* Cluster: Energy Preference, Attribute: CurrentEnergyBalance, Privilege: view */ \
     /* Cluster: Energy Preference, Attribute: CurrentLowPowerModeSensitivity, Privilege: view */ \
-    /* Cluster: Window Covering, Attribute: Mode, Privilege: view */ \
     /* Cluster: Color Control, Attribute: WhitePointX, Privilege: view */ \
     /* Cluster: Color Control, Attribute: WhitePointY, Privilege: view */ \
     /* Cluster: Color Control, Attribute: ColorPointRX, Privilege: view */ \
@@ -102,7 +100,6 @@
     /* Cluster: User Label, Attribute: LabelList, Privilege: view */ \
     /* Cluster: Energy Preference, Attribute: CurrentEnergyBalance, Privilege: view */ \
     /* Cluster: Energy Preference, Attribute: CurrentLowPowerModeSensitivity, Privilege: view */ \
-    /* Cluster: Window Covering, Attribute: Mode, Privilege: view */ \
     /* Cluster: Color Control, Attribute: WhitePointX, Privilege: view */ \
     /* Cluster: Color Control, Attribute: WhitePointY, Privilege: view */ \
     /* Cluster: Color Control, Attribute: ColorPointRX, Privilege: view */ \
