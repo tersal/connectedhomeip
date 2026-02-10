@@ -94,13 +94,6 @@ static CHIP_ERROR ScalarValue(ConcreteAttributePath attrPath, SafeAttributePersi
     buffer.reduce_size(sizeof(T));
     return provider.ReadScalarValue(attrPath, *reinterpret_cast<T *>(buffer.data()));
 }
-
-template <class T>
-static CHIP_ERROR SafeValue(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider, MutableByteSpan & buffer)
-{
-    buffer.reduce_size(sizeof(T));
-    return provider.SafeReadValue(attrPath, buffer);
-}
 }; // namespace DefaultMigrators
 
 
