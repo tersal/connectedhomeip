@@ -22,23 +22,15 @@
 namespace chip {
 namespace app {
 namespace Clusters {
-
-class UnitLocalizationClusterWithMigration : public UnitLocalization::UnitLocalizationCluster
-{
-public:
-    UnitLocalizationClusterWithMigration(EndpointId endpointId, BitFlags<UnitLocalization::Feature> feature);
-
-    CHIP_ERROR Startup(ServerClusterContext & context) override;
-};
-
 namespace UnitLocalization {
 
-class UnitLocalizationServer : public UnitLocalizationClusterWithMigration
+class UnitLocalizationServer : public UnitLocalizationCluster
 {
 public:
     UnitLocalizationServer(EndpointId endpointId, const BitFlags<UnitLocalization::Feature> features) :
-        UnitLocalizationClusterWithMigration(endpointId, features)
+        UnitLocalizationCluster(endpointId, features)
     {}
+    CHIP_ERROR Startup(ServerClusterContext & context) override;
     static UnitLocalizationServer & Instance();
 };
 

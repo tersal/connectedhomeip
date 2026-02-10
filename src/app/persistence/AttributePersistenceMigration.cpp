@@ -1,9 +1,4 @@
 #include <app/persistence/AttributePersistenceMigration.h>
-
-#define K_MIGRATION_LOG_FORMAT                                                                                                     \
-    "Migration Error - Failed %s path in %s provider" ChipLogFormatMEI "/" ChipLogFormatMEI "/" ChipLogFormatMEI                   \
-    " - %" CHIP_ERROR_FORMAT
-
 namespace chip::app {
 
 CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceProvider & safeProvider,
@@ -24,10 +19,7 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
         auto firstAttributePath = ConcreteAttributePath(cluster.mEndpointId, cluster.mClusterId, attributes[0].first);
         err                     = normProvider.ReadValue(firstAttributePath, copyOfBuffer);
         // If the attribute is already in the standard Attribute provider it means that a migration already happened
-        if (err != CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND)
-        {
-            return CHIP_NO_ERROR;
-        }
+        VerifyOrReturnError(err != CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND, CHIP_NO_ERROR);
     }
 
     ConcreteAttributePath attrPath;
@@ -41,35 +33,19 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
 
         // Read Value, will resize copyOfBuffer to read size
         err = migrator(attrPath, safeProvider, copyOfBuffer);
-        if (err == CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND)
-        {
-            // The value does not exist so nothing to migrate, skip
-            continue;
-        }
         if (err != CHIP_NO_ERROR)
         {
-            ChipLogError(NotSpecified, K_MIGRATION_LOG_FORMAT, "Reading", "deprecated safe", ChipLogValueMEI(cluster.mEndpointId),
-                         ChipLogValueMEI(cluster.mClusterId), ChipLogValueMEI(attr), err.Format());
             continue;
         }
 
         err = normProvider.WriteValue(attrPath, copyOfBuffer);
         if (err != CHIP_NO_ERROR)
         {
-            ChipLogError(NotSpecified, K_MIGRATION_LOG_FORMAT, "Writing", "normal", ChipLogValueMEI(cluster.mEndpointId),
-                         ChipLogValueMEI(cluster.mClusterId), ChipLogValueMEI(attr), err.Format());
             continue;
         }
 
         err = safeProvider.SafeDeleteValue(attrPath);
-        if (err != CHIP_NO_ERROR)
-        {
-            ChipLogError(NotSpecified, K_MIGRATION_LOG_FORMAT, "Deleting", "deprecated safe", ChipLogValueMEI(cluster.mEndpointId),
-                         ChipLogValueMEI(cluster.mClusterId), ChipLogValueMEI(attr), err.Format());
-        }
     }
     return err;
 };
 } // namespace chip::app
-
-#undef K_MIGRATION_LOG_FORMAT

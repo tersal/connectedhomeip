@@ -67,6 +67,14 @@ UnitLocalizationServer & UnitLocalizationServer::Instance()
     return gServer.Cluster();
 }
 
+CHIP_ERROR UnitLocalizationServer::Startup(ServerClusterContext & context)
+{
+    static constexpr AttrMigrationData attributesToUpdate[] = { { UnitLocalization::Attributes::TemperatureUnit::Id,
+                                                                  &DefaultMigrators::ScalarValue<uint8_t> } };
+    ReturnErrorOnFailure(MigrateFromSafeAttributePersistenceProvider(mPath, Span(attributesToUpdate), context.storage));
+    return UnitLocalizationCluster::Startup(context);
+}
+
 void MatterUnitLocalizationClusterInitCallback(chip::EndpointId endpointId)
 {
     // This cluster should only exist in Root endpoint.
@@ -100,22 +108,5 @@ void MatterUnitLocalizationClusterShutdownCallback(chip::EndpointId endpointId, 
         },
         integrationDelegate, shutdownType);
 }
-
-namespace chip::app::Clusters {
-
-UnitLocalizationClusterWithMigration::UnitLocalizationClusterWithMigration(EndpointId endpointId,
-                                                                           BitFlags<UnitLocalization::Feature> feature) :
-    UnitLocalizationCluster(endpointId, feature)
-{}
-
-CHIP_ERROR UnitLocalizationClusterWithMigration::Startup(ServerClusterContext & context)
-{
-    static constexpr AttrMigrationData attributesToUpdate[] = { { UnitLocalization::Attributes::TemperatureUnit::Id,
-                                                                  &DefaultMigrators::ScalarValue<uint8_t> } };
-    ReturnErrorOnFailure(MigrateFromSafeAttributePersistenceProvider<16>(mPath, Span(attributesToUpdate), context.storage));
-    return UnitLocalizationCluster::Startup(context);
-}
-
-} // namespace chip::app::Clusters
 
 void MatterUnitLocalizationPluginServerInitCallback() {}

@@ -49,15 +49,6 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
                                                        const ConcreteClusterPath & cluster,
                                                        Span<const AttrMigrationData> attributes, MutableByteSpan & buffer);
 
-namespace DefaultMigrators {
-template <class T>
-static CHIP_ERROR ScalarValue(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider, MutableByteSpan & buffer)
-{
-    buffer.reduce_size(sizeof(T));
-    return provider.ReadScalarValue(attrPath, *reinterpret_cast<T *>(buffer.data()));
-}
-}; // namespace DefaultMigrators
-
 /**
  * @brief
  * This overload provides a simple function to migrate from the SafeAttributeProvider to the standard provider mechanism over
@@ -95,5 +86,22 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(const ConcreteClusterPath
 
     return MigrateFromSafeAttributePersistenceProvider(safeProvider, normProvider, cluster, attributes, buffer);
 };
+
+namespace DefaultMigrators {
+template <class T>
+static CHIP_ERROR ScalarValue(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider, MutableByteSpan & buffer)
+{
+    buffer.reduce_size(sizeof(T));
+    return provider.ReadScalarValue(attrPath, *reinterpret_cast<T *>(buffer.data()));
+}
+
+template <class T>
+static CHIP_ERROR SafeValue(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider, MutableByteSpan & buffer)
+{
+    buffer.reduce_size(sizeof(T));
+    return provider.SafeReadValue(attrPath, buffer);
+}
+}; // namespace DefaultMigrators
+
 
 } // namespace chip::app
