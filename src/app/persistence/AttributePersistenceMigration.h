@@ -27,7 +27,12 @@ using SafeAttributeMigrator = CHIP_ERROR (*)(ConcreteAttributePath attrPath, Saf
 using AttrMigrationData     = std::pair<const AttributeId, SafeAttributeMigrator>;
 /**
  * @brief
- * This overload provides a simple function to migrate from the SafeAttributeProvider to the standard provider mechanism
+ * This function migrates attribute values from the SafeAttributeProvider to the standard provider mechanism.
+ *
+ * Each attribute is checked individually in the safe provider. If an attribute is not found, it is skipped.
+ * When a value is found, it is always deleted from the safe provider after the read, regardless of whether
+ * the write to the standard provider succeeds. This ensures each attribute is only migrated once and avoids
+ * overwriting newer runtime values with stale persisted data on subsequent startups.
  *
  * @param safeProvider A SafeAttributePersistenceProvider implementation to migrate from.
  * @param normProvider A standard AttributePersistenceProvider implementation to migrate to.
