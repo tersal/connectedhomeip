@@ -96,5 +96,4 @@ static CHIP_ERROR ScalarValue(ConcreteAttributePath attrPath, SafeAttributePersi
 }
 }; // namespace DefaultMigrators
 
-
 } // namespace chip::app
