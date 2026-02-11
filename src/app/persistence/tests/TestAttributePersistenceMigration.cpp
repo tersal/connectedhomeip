@@ -1,5 +1,5 @@
 /*
- *    Copyright (c) 2025 Project CHIP Authors
+ *    Copyright (c) 2026 Project CHIP Authors
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -15,22 +15,15 @@
  */
 #include <pw_unit_test/framework.h>
 
-#include <app/AttributeValueDecoder.h>
 #include <app/ConcreteAttributePath.h>
 #include <app/DefaultSafeAttributePersistenceProvider.h>
-#include <app/data-model-provider/tests/WriteTesting.h>
-#include <app/persistence/AttributePersistence.h>
+#include <app/persistence/AttributePersistenceMigration.h>
 #include <app/persistence/DefaultAttributePersistenceProvider.h>
-#include <app/persistence/DefaultAttributePersistenceProvider.h>
-#include <app/persistence/String.h>
-#include <clusters/TimeFormatLocalization/Enums.h>
-#include <clusters/TimeFormatLocalization/EnumsCheck.h>
 #include <lib/core/CHIPError.h>
 #include <lib/core/StringBuilderAdapters.h>
 #include <lib/support/DefaultStorageKeyAllocator.h>
 #include <lib/support/Span.h>
 #include <lib/support/TestPersistentStorageDelegate.h>
-#include <unistd.h>
 
 namespace {
 
@@ -38,6 +31,7 @@ using namespace chip;
 using namespace chip::app;
 using namespace chip::Testing;
 
+// Single attribute migrated successfully: value appears in AttributePersistence, deleted from SafeAttribute.
 TEST(TestAttributePersistenceMigration, TestMigrationSuccess)
 {
     TestPersistentStorageDelegate storageDelegate;
@@ -47,14 +41,319 @@ TEST(TestAttributePersistenceMigration, TestMigrationSuccess)
     ASSERT_EQ(safeRamProvider.Init(&storageDelegate), CHIP_NO_ERROR);
 
     const ConcreteAttributePath path(1, 2, 3);
+    const ConcreteClusterPath cluster(1, 2);
     constexpr uint32_t kValueToStore = 42;
 
-    // Store a fake value
+    // Store a value in the safe provider
+    ASSERT_EQ(safeRamProvider.WriteScalarValue(path, kValueToStore), CHIP_NO_ERROR);
+
+    // Run migration
+    const AttrMigrationData attributesToMigrate[] = {
+        { 3, &DefaultMigrators::ScalarValue<uint32_t> },
+    };
+    uint8_t buf[128] = {};
+    MutableByteSpan buffer(buf);
+    EXPECT_EQ(MigrateFromSafeAttributePersistenceProvider(safeRamProvider, ramProvider, cluster, Span(attributesToMigrate), buffer),
+              CHIP_NO_ERROR);
+
+    // Value should now exist in the normal provider
     {
-        EXPECT_EQ(safeRamProvider.WriteScalarValue(path, kValueToStore), CHIP_NO_ERROR);
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(ramProvider.ReadValue(path, readBuffer), CHIP_NO_ERROR);
+
+        uint32_t readValue = 0;
+        memcpy(&readValue, readBuffer.data(), sizeof(uint32_t));
+        EXPECT_EQ(readValue, kValueToStore);
     }
 
+    // Value should be deleted from the safe provider
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(safeRamProvider.SafeReadValue(path, readBuffer), CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND);
+    }
 }
 
+// Attribute not present in SafeAttribute: AttributePersistence untouched, no error.
+TEST(TestAttributePersistenceMigration, TestMigrationSkipsAbsentAttribute)
+{
+    TestPersistentStorageDelegate storageDelegate;
+    DefaultAttributePersistenceProvider ramProvider;
+    DefaultSafeAttributePersistenceProvider safeRamProvider;
+    ASSERT_EQ(ramProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+    ASSERT_EQ(safeRamProvider.Init(&storageDelegate), CHIP_NO_ERROR);
 
+    const ConcreteAttributePath path(1, 2, 3);
+    const ConcreteClusterPath cluster(1, 2);
+
+    // Don't write anything to the safe provider
+
+    const AttrMigrationData attributesToMigrate[] = {
+        { 3, &DefaultMigrators::ScalarValue<uint32_t> },
+    };
+    uint8_t buf[128] = {};
+    MutableByteSpan buffer(buf);
+    EXPECT_EQ(MigrateFromSafeAttributePersistenceProvider(safeRamProvider, ramProvider, cluster, Span(attributesToMigrate), buffer),
+              CHIP_NO_ERROR);
+
+    // Normal provider should have nothing
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(ramProvider.ReadValue(path, readBuffer), CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND);
+    }
 }
+
+// When WriteValue to AttributePersistence fails, the value is still deleted from SafeAttribute ("one time" migration guarantee).
+TEST(TestAttributePersistenceMigration, TestMigrationDeletesFromSafeOnWriteFailure)
+{
+    TestPersistentStorageDelegate storageDelegate;
+    DefaultAttributePersistenceProvider ramProvider;
+    DefaultSafeAttributePersistenceProvider safeRamProvider;
+    ASSERT_EQ(ramProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+    ASSERT_EQ(safeRamProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+
+    const ConcreteAttributePath path(1, 2, 3);
+    const ConcreteClusterPath cluster(1, 2);
+    constexpr uint32_t kValueToStore = 42;
+
+    // Store a value in the safe provider
+    ASSERT_EQ(safeRamProvider.WriteScalarValue(path, kValueToStore), CHIP_NO_ERROR);
+
+    // Poison the normal provider key so WriteValue fails
+    storageDelegate.AddPoisonKey(DefaultStorageKeyAllocator::AttributeValue(1, 2, 3).KeyName());
+
+    const AttrMigrationData attributesToMigrate[] = {
+        { 3, &DefaultMigrators::ScalarValue<uint32_t> },
+    };
+    uint8_t buf[128] = {};
+    MutableByteSpan buffer(buf);
+    EXPECT_NE(MigrateFromSafeAttributePersistenceProvider(safeRamProvider, ramProvider, cluster, Span(attributesToMigrate), buffer),
+              CHIP_NO_ERROR);
+
+    // Value should still be deleted from the safe provider
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(safeRamProvider.SafeReadValue(path, readBuffer), CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND);
+    }
+}
+
+// After a successful migration, calling it again is a no-op (value already deleted from SafeAttribute).
+TEST(TestAttributePersistenceMigration, TestMigrationTwice)
+{
+    TestPersistentStorageDelegate storageDelegate;
+    DefaultAttributePersistenceProvider ramProvider;
+    DefaultSafeAttributePersistenceProvider safeRamProvider;
+    ASSERT_EQ(ramProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+    ASSERT_EQ(safeRamProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+
+    const ConcreteAttributePath path(1, 2, 3);
+    const ConcreteClusterPath cluster(1, 2);
+    constexpr uint32_t kValueToStore = 42;
+
+    ASSERT_EQ(safeRamProvider.WriteScalarValue(path, kValueToStore), CHIP_NO_ERROR);
+
+    const AttrMigrationData attributesToMigrate[] = {
+        { 3, &DefaultMigrators::ScalarValue<uint32_t> },
+    };
+    uint8_t buf[128] = {};
+    MutableByteSpan buffer(buf);
+
+    // First migration
+    EXPECT_EQ(MigrateFromSafeAttributePersistenceProvider(safeRamProvider, ramProvider, cluster, Span(attributesToMigrate), buffer),
+              CHIP_NO_ERROR);
+
+    // Overwrite the value in normProvider to detect if a second migration would overwrite it
+    constexpr uint32_t kNewValue = 99;
+    ASSERT_EQ(ramProvider.WriteValue(path, ByteSpan(reinterpret_cast<const uint8_t *>(&kNewValue), sizeof(kNewValue))),
+              CHIP_NO_ERROR);
+
+    // Second migration, shouldn't affect the new value and return no error.
+    EXPECT_EQ(MigrateFromSafeAttributePersistenceProvider(safeRamProvider, ramProvider, cluster, Span(attributesToMigrate), buffer),
+              CHIP_NO_ERROR);
+
+    // The new value should still be intact
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(ramProvider.ReadValue(path, readBuffer), CHIP_NO_ERROR);
+
+        uint32_t readValue = 0;
+        memcpy(&readValue, readBuffer.data(), sizeof(uint32_t));
+        EXPECT_EQ(readValue, kNewValue);
+    }
+}
+
+// Two attributes in the list, only the second is present in SafeAttribute. First is skipped, second is migrated.
+TEST(TestAttributePersistenceMigration, TestMultipleAttributesMixedPresence)
+{
+    TestPersistentStorageDelegate storageDelegate;
+    DefaultAttributePersistenceProvider ramProvider;
+    DefaultSafeAttributePersistenceProvider safeRamProvider;
+    ASSERT_EQ(ramProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+    ASSERT_EQ(safeRamProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+
+    const ConcreteAttributePath pathA(1, 2, 3);
+    const ConcreteAttributePath pathB(1, 2, 4);
+    const ConcreteClusterPath cluster(1, 2);
+    constexpr uint32_t kValueB = 77;
+
+    // Only write attribute B to the safe provider
+    ASSERT_EQ(safeRamProvider.WriteScalarValue(pathB, kValueB), CHIP_NO_ERROR);
+
+    const AttrMigrationData attributesToMigrate[] = {
+        { 3, &DefaultMigrators::ScalarValue<uint32_t> },
+        { 4, &DefaultMigrators::ScalarValue<uint32_t> },
+    };
+    uint8_t buf[128] = {};
+    MutableByteSpan buffer(buf);
+    EXPECT_EQ(MigrateFromSafeAttributePersistenceProvider(safeRamProvider, ramProvider, cluster, Span(attributesToMigrate), buffer),
+              CHIP_NO_ERROR);
+
+    // Attribute A should not exist in the normal provider
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(ramProvider.ReadValue(pathA, readBuffer), CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND);
+    }
+
+    // Attribute B should be migrated to the normal provider
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(ramProvider.ReadValue(pathB, readBuffer), CHIP_NO_ERROR);
+
+        uint32_t readValue = 0;
+        memcpy(&readValue, readBuffer.data(), sizeof(uint32_t));
+        EXPECT_EQ(readValue, kValueB);
+    }
+
+    // Attribute B should be deleted from the safe provider
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(safeRamProvider.SafeReadValue(pathB, readBuffer), CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND);
+    }
+}
+
+// Two attributes both present in SafeAttribute: both are migrated and deleted.
+TEST(TestAttributePersistenceMigration, TestMultipleAttributesAllPresent)
+{
+    TestPersistentStorageDelegate storageDelegate;
+    DefaultAttributePersistenceProvider ramProvider;
+    DefaultSafeAttributePersistenceProvider safeRamProvider;
+    ASSERT_EQ(ramProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+    ASSERT_EQ(safeRamProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+
+    const ConcreteAttributePath pathA(1, 2, 3);
+    const ConcreteAttributePath pathB(1, 2, 4);
+    const ConcreteClusterPath cluster(1, 2);
+    constexpr uint32_t kValueA = 10;
+    constexpr uint32_t kValueB = 20;
+
+    ASSERT_EQ(safeRamProvider.WriteScalarValue(pathA, kValueA), CHIP_NO_ERROR);
+    ASSERT_EQ(safeRamProvider.WriteScalarValue(pathB, kValueB), CHIP_NO_ERROR);
+
+    const AttrMigrationData attributesToMigrate[] = {
+        { 3, &DefaultMigrators::ScalarValue<uint32_t> },
+        { 4, &DefaultMigrators::ScalarValue<uint32_t> },
+    };
+    uint8_t buf[128] = {};
+    MutableByteSpan buffer(buf);
+    EXPECT_EQ(MigrateFromSafeAttributePersistenceProvider(safeRamProvider, ramProvider, cluster, Span(attributesToMigrate), buffer),
+              CHIP_NO_ERROR);
+
+    // Both should be in the normal provider
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(ramProvider.ReadValue(pathA, readBuffer), CHIP_NO_ERROR);
+
+        uint32_t readValue = 0;
+        memcpy(&readValue, readBuffer.data(), sizeof(uint32_t));
+        EXPECT_EQ(readValue, kValueA);
+    }
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(ramProvider.ReadValue(pathB, readBuffer), CHIP_NO_ERROR);
+
+        uint32_t readValue = 0;
+        memcpy(&readValue, readBuffer.data(), sizeof(uint32_t));
+        EXPECT_EQ(readValue, kValueB);
+    }
+
+    // Both should be deleted from the safe provider
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(safeRamProvider.SafeReadValue(pathA, readBuffer), CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND);
+    }
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(safeRamProvider.SafeReadValue(pathB, readBuffer), CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND);
+    }
+}
+
+// Empty attribute list: migration is a no-op, returns CHIP_NO_ERROR.
+TEST(TestAttributePersistenceMigration, TestMigrationWithEmptyAttributeList)
+{
+    TestPersistentStorageDelegate storageDelegate;
+    DefaultAttributePersistenceProvider ramProvider;
+    DefaultSafeAttributePersistenceProvider safeRamProvider;
+    ASSERT_EQ(ramProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+    ASSERT_EQ(safeRamProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+
+    const ConcreteClusterPath cluster(1, 2);
+
+    uint8_t buf[128] = {};
+    MutableByteSpan buffer(buf);
+    EXPECT_EQ(
+        MigrateFromSafeAttributePersistenceProvider(safeRamProvider, ramProvider, cluster, Span<const AttrMigrationData>(), buffer),
+        CHIP_NO_ERROR);
+}
+
+// Template overload: end-to-end migration using the convenience wrapper.
+TEST(TestAttributePersistenceMigration, TestTemplateOverload)
+{
+    TestPersistentStorageDelegate storageDelegate;
+    DefaultSafeAttributePersistenceProvider safeRamProvider;
+    ASSERT_EQ(safeRamProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+
+    const ConcreteAttributePath path(1, 2, 3);
+    const ConcreteClusterPath cluster(1, 2);
+    constexpr uint32_t kValueToStore = 55;
+
+    ASSERT_EQ(safeRamProvider.WriteScalarValue(path, kValueToStore), CHIP_NO_ERROR);
+
+    const AttrMigrationData attributesToMigrate[] = {
+        { 3, &DefaultMigrators::ScalarValue<uint32_t> },
+    };
+    EXPECT_EQ(MigrateFromSafeAttributePersistenceProvider(cluster, Span(attributesToMigrate), storageDelegate), CHIP_NO_ERROR);
+
+    // Verify by creating a new normal provider and reading back
+    {
+        DefaultAttributePersistenceProvider ramProvider;
+        ASSERT_EQ(ramProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(ramProvider.ReadValue(path, readBuffer), CHIP_NO_ERROR);
+
+        uint32_t readValue = 0;
+        memcpy(&readValue, readBuffer.data(), sizeof(uint32_t));
+        EXPECT_EQ(readValue, kValueToStore);
+    }
+
+    // Safe provider should have the value deleted
+    {
+        uint8_t readBuf[sizeof(uint32_t)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(safeRamProvider.SafeReadValue(path, readBuffer), CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND);
+    }
+}
+
+} // namespace
