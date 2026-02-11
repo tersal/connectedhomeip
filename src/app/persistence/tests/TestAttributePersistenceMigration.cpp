@@ -356,4 +356,46 @@ TEST(TestAttributePersistenceMigration, TestTemplateOverload)
     }
 }
 
+// Migration using DefaultMigrators::SafeValue which reads raw bytes via SafeReadValue.
+TEST(TestAttributePersistenceMigration, TestMigrationWithSafeValueMigrator)
+{
+    TestPersistentStorageDelegate storageDelegate;
+    DefaultAttributePersistenceProvider ramProvider;
+    DefaultSafeAttributePersistenceProvider safeRamProvider;
+    ASSERT_EQ(ramProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+    ASSERT_EQ(safeRamProvider.Init(&storageDelegate), CHIP_NO_ERROR);
+
+    const ConcreteAttributePath path(1, 2, 3);
+    const ConcreteClusterPath cluster(1, 2);
+
+    // Write raw bytes to the safe provider
+    const uint8_t kRawValue[] = { 0xDE, 0xAD, 0xBE, 0xEF };
+    ASSERT_EQ(safeRamProvider.SafeWriteValue(path, ByteSpan(kRawValue)), CHIP_NO_ERROR);
+
+    // Migrate using SafeValue (raw byte migrator)
+    const AttrMigrationData attributesToMigrate[] = {
+        { 3, &DefaultMigrators::SafeValue },
+    };
+    uint8_t buf[128] = {};
+    MutableByteSpan buffer(buf);
+    EXPECT_EQ(MigrateFromSafeAttributePersistenceProvider(safeRamProvider, ramProvider, cluster, Span(attributesToMigrate), buffer),
+              CHIP_NO_ERROR);
+
+    // Value should now exist in the normal provider with the same raw bytes
+    {
+        uint8_t readBuf[sizeof(kRawValue)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(ramProvider.ReadValue(path, readBuffer), CHIP_NO_ERROR);
+        EXPECT_EQ(readBuffer.size(), sizeof(kRawValue));
+        EXPECT_EQ(memcmp(readBuffer.data(), kRawValue, sizeof(kRawValue)), 0);
+    }
+
+    // Value should be deleted from the safe provider
+    {
+        uint8_t readBuf[sizeof(kRawValue)] = {};
+        MutableByteSpan readBuffer(readBuf);
+        EXPECT_EQ(safeRamProvider.SafeReadValue(path, readBuffer), CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND);
+    }
+}
+
 } // namespace
