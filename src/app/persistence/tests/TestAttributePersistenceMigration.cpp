@@ -16,7 +16,6 @@
 #include <pw_unit_test/framework.h>
 
 #include <app/ConcreteAttributePath.h>
-#include <app/DefaultSafeAttributePersistenceProvider.h>
 #include <app/persistence/AttributePersistenceMigration.h>
 #include <lib/core/CHIPError.h>
 #include <lib/core/StringBuilderAdapters.h>
