@@ -16,9 +16,6 @@
  *    limitations under the License.
  */
 
-#include <app-common/zap-generated/ids/Attributes.h>
-#include <app-common/zap-generated/ids/Clusters.h>
-#include <app/SafeAttributePersistenceProvider.h>
 #include <app/clusters/unit-localization-server/UnitLocalizationCluster.h>
 #include <app/reporting/reporting.h>
 #include <app/server-cluster/AttributeListBuilder.h>
@@ -39,8 +36,8 @@ CHIP_ERROR UnitLocalizationCluster::Startup(ServerClusterContext & context)
     CHIP_ERROR err         = CHIP_NO_ERROR;
     uint8_t storedTempUnit = 0;
 
-    err = GetSafeAttributePersistenceProvider()->ReadScalarValue(
-        ConcreteAttributePath(kRootEndpointId, UnitLocalization::Id, TemperatureUnit::Id), storedTempUnit);
+    MutableByteSpan span(&storedTempUnit, sizeof(storedTempUnit));
+    err = context.attributeStorage.ReadValue(ConcreteAttributePath(kRootEndpointId, UnitLocalization::Id, TemperatureUnit::Id), span);
     if (err == CHIP_NO_ERROR)
     {
         mTemperatureUnit = static_cast<TempUnitEnum>(storedTempUnit);
@@ -119,8 +116,8 @@ CHIP_ERROR UnitLocalizationCluster::SetTemperatureUnit(TempUnitEnum newTempUnit)
 
     VerifyOrReturnError(SetAttributeValue(mTemperatureUnit, newTempUnit, TemperatureUnit::Id), CHIP_NO_ERROR);
 
-    return GetSafeAttributePersistenceProvider()->WriteScalarValue(
-        ConcreteAttributePath(kRootEndpointId, UnitLocalization::Id, TemperatureUnit::Id), to_underlying(mTemperatureUnit));
+    return mContext->attributeStorage.WriteValue(ConcreteAttributePath(kRootEndpointId, UnitLocalization::Id, TemperatureUnit::Id), 
+                                                 { reinterpret_cast<const uint8_t *>(&mTemperatureUnit), sizeof(mTemperatureUnit) });
 }
 
 CHIP_ERROR UnitLocalizationCluster::Attributes(const ConcreteClusterPath & path,
