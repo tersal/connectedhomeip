@@ -27,7 +27,6 @@ namespace {
 
 using namespace chip;
 using namespace chip::app;
-using namespace chip::Testing;
 
 // Single attribute migrated successfully: value appears in AttributePersistence, deleted from SafeAttribute.
 TEST(TestAttributePersistenceMigration, TestMigrationSuccess)
