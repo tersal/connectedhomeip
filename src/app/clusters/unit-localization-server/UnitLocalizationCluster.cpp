@@ -49,7 +49,7 @@ CHIP_ERROR UnitLocalizationCluster::Startup(ServerClusterContext & context)
         ChipLogDetail(Zcl, "UnitLocalization ep0 set default TemperatureUnit: %u", to_underlying(mTemperatureUnit));
     }
 
-    return err;
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR UnitLocalizationCluster::SetSupportedTemperatureUnits(DataModel::List<TempUnitEnum> & units)
