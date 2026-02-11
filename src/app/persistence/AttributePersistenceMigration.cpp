@@ -13,12 +13,12 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
     for (const auto & [attr, migrator] : attributes)
     {
         ChipError attributeMigrationError = CHIP_NO_ERROR;
-        attrPath                     = ConcreteAttributePath(cluster.mEndpointId, cluster.mClusterId, attr);
+        attrPath                          = ConcreteAttributePath(cluster.mEndpointId, cluster.mClusterId, attr);
 
         // Create a copy of the buffer to check if the value is already in the AttributePersistence
         // If the attribute value is already stored in AttributePersistence, skip it.
         MutableByteSpan readAttrBuffer = buffer;
-        if(normProvider.ReadValue(attrPath, readAttrBuffer) == CHIP_NO_ERROR)
+        if (normProvider.ReadValue(attrPath, readAttrBuffer) == CHIP_NO_ERROR)
         {
             continue;
         }
@@ -27,7 +27,7 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
         // Still refers to same internal buffer though
         // Read value from the safe provider, will resize copyOfBuffer to read size
         MutableByteSpan copyOfBuffer = buffer;
-        attributeMigrationError = migrator(attrPath, safeProvider, copyOfBuffer);
+        attributeMigrationError      = migrator(attrPath, safeProvider, copyOfBuffer);
         if (attributeMigrationError == CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND)
         {
             // Attribute not in safe provider, nothing to migrate
@@ -43,7 +43,9 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
         if (attributeMigrationError != CHIP_NO_ERROR)
         {
             migrationError = CHIP_ERROR_HAD_FAILURES;
-            ChipLogError(NotSpecified, "AttributeMigration: Error reading SafeAttribute '" ChipLogFormatMEI "' from cluster '" ChipLogFormatMEI, ChipLogValueMEI(attr), ChipLogValueMEI(cluster.mClusterId));
+            ChipLogError(NotSpecified,
+                         "AttributeMigration: Error reading SafeAttribute '" ChipLogFormatMEI "' from cluster '" ChipLogFormatMEI,
+                         ChipLogValueMEI(attr), ChipLogValueMEI(cluster.mClusterId));
             continue;
         }
 
@@ -51,16 +53,18 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
         if (normProvider.WriteValue(attrPath, copyOfBuffer) != CHIP_NO_ERROR)
         {
             migrationError = CHIP_ERROR_HAD_FAILURES;
-            ChipLogError(NotSpecified, "AttributeMigration: Error writing Attribute '" ChipLogFormatMEI "' from cluster '" ChipLogFormatMEI, ChipLogValueMEI(attr), ChipLogValueMEI(cluster.mClusterId));
+            ChipLogError(NotSpecified,
+                         "AttributeMigration: Error writing Attribute '" ChipLogFormatMEI "' from cluster '" ChipLogFormatMEI,
+                         ChipLogValueMEI(attr), ChipLogValueMEI(cluster.mClusterId));
         }
     }
     return migrationError;
 };
 
 namespace DefaultMigrators {
-    CHIP_ERROR SafeValue(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider, MutableByteSpan & buffer)
-    {
-        return provider.SafeReadValue(attrPath, buffer);
-    }
+CHIP_ERROR SafeValue(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider, MutableByteSpan & buffer)
+{
+    return provider.SafeReadValue(attrPath, buffer);
 }
+} // namespace DefaultMigrators
 } // namespace chip::app

@@ -37,7 +37,8 @@ CHIP_ERROR UnitLocalizationCluster::Startup(ServerClusterContext & context)
     uint8_t storedTempUnit = 0;
 
     MutableByteSpan span(&storedTempUnit, sizeof(storedTempUnit));
-    err = context.attributeStorage.ReadValue(ConcreteAttributePath(kRootEndpointId, UnitLocalization::Id, TemperatureUnit::Id), span);
+    err =
+        context.attributeStorage.ReadValue(ConcreteAttributePath(kRootEndpointId, UnitLocalization::Id, TemperatureUnit::Id), span);
     if (err == CHIP_NO_ERROR)
     {
         mTemperatureUnit = static_cast<TempUnitEnum>(storedTempUnit);
@@ -116,8 +117,9 @@ CHIP_ERROR UnitLocalizationCluster::SetTemperatureUnit(TempUnitEnum newTempUnit)
 
     VerifyOrReturnError(SetAttributeValue(mTemperatureUnit, newTempUnit, TemperatureUnit::Id), CHIP_NO_ERROR);
 
-    return mContext->attributeStorage.WriteValue(ConcreteAttributePath(kRootEndpointId, UnitLocalization::Id, TemperatureUnit::Id),
-                                                 { reinterpret_cast<const uint8_t *>(&mTemperatureUnit), sizeof(mTemperatureUnit) });
+    return mContext->attributeStorage.WriteValue(
+        ConcreteAttributePath(kRootEndpointId, UnitLocalization::Id, TemperatureUnit::Id),
+        { reinterpret_cast<const uint8_t *>(&mTemperatureUnit), sizeof(mTemperatureUnit) });
 }
 
 CHIP_ERROR UnitLocalizationCluster::Attributes(const ConcreteClusterPath & path,
