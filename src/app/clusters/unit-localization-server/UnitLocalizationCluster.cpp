@@ -116,7 +116,7 @@ CHIP_ERROR UnitLocalizationCluster::SetTemperatureUnit(TempUnitEnum newTempUnit)
 
     VerifyOrReturnError(SetAttributeValue(mTemperatureUnit, newTempUnit, TemperatureUnit::Id), CHIP_NO_ERROR);
 
-    return mContext->attributeStorage.WriteValue(ConcreteAttributePath(kRootEndpointId, UnitLocalization::Id, TemperatureUnit::Id), 
+    return mContext->attributeStorage.WriteValue(ConcreteAttributePath(kRootEndpointId, UnitLocalization::Id, TemperatureUnit::Id),
                                                  { reinterpret_cast<const uint8_t *>(&mTemperatureUnit), sizeof(mTemperatureUnit) });
 }
 
