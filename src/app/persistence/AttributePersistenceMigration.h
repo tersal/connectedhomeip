@@ -18,7 +18,6 @@
 #include <app/DefaultSafeAttributePersistenceProvider.h>
 #include <app/persistence/AttributePersistence.h>
 #include <app/persistence/DefaultAttributePersistenceProvider.h>
-#include <lib/support/logging/CHIPLogging.h>
 
 #include <cstring>
 

@@ -1,6 +1,5 @@
 #include <app/persistence/AttributePersistenceMigration.h>
-
-#include <iostream>
+#include <lib/support/logging/CHIPLogging.h>
 
 namespace chip::app {
 
@@ -23,7 +22,6 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
         MutableByteSpan readAttrBuffer = buffer;
         if (normProvider.ReadValue(attrPath, readAttrBuffer) != CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND)
         {
-            std::cout << "I'm Here" << std::endl;
             continue;
         }
 
