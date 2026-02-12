@@ -20,6 +20,8 @@
 
 #include <app/persistence/AttributePersistence.h>
 
+#include <cstring>
+
 namespace chip::app {
 
 using SafeAttributeMigrator = CHIP_ERROR (*)(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider,
@@ -96,8 +98,11 @@ namespace DefaultMigrators {
 template <class T>
 static CHIP_ERROR ScalarValue(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider, MutableByteSpan & buffer)
 {
+    T value;
+    ReturnErrorOnFailure(provider.ReadScalarValue(attrPath, value));
     buffer.reduce_size(sizeof(T));
-    return provider.ReadScalarValue(attrPath, *reinterpret_cast<T *>(buffer.data()));
+    memcpy(buffer.data(), &value, sizeof(T));
+    return CHIP_NO_ERROR;
 }
 
 CHIP_ERROR SafeValue(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider, MutableByteSpan & buffer);
