@@ -44,7 +44,8 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
         {
             migrationError = CHIP_ERROR_HAD_FAILURES;
             ChipLogError(NotSpecified,
-                         "AttributeMigration: Error reading SafeAttribute '" ChipLogFormatMEI "' from cluster '" ChipLogFormatMEI "'",
+                         "AttributeMigration: Error reading SafeAttribute '" ChipLogFormatMEI "' from cluster '" ChipLogFormatMEI
+                         "'",
                          ChipLogValueMEI(attr), ChipLogValueMEI(cluster.mClusterId));
             continue;
         }
