@@ -30,7 +30,9 @@ using AttrMigrationData     = std::pair<const AttributeId, SafeAttributeMigrator
  * @brief
  * This function migrates attribute values from the SafeAttributeProvider to the standard provider mechanism.
  *
- * Each attribute is checked individually in the safe provider. If an attribute is not found, it is skipped.
+ * Each attribute is first checked in the standard provider. If the value is already present, the attribute
+ * is skipped to avoid overwriting a newer runtime value. Otherwise, the attribute is read from the safe
+ * provider. If a value is not found in the safe provider, it is skipped.
  * When a value is found, it is always deleted from the safe provider after the read, regardless of whether
  * the write to the standard provider succeeds. This ensures each attribute is only migrated once and avoids
  * overwriting newer runtime values with stale persisted data on subsequent startups.
@@ -58,7 +60,7 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
  * the same storageDelegate.
  *
  *
- * @param attributeBufferSize  The size of the buffer to use to as swap memory between providers
+ * @param attributeBufferSize  The size of the buffer to use as temporary storage between providers
  * @param cluster              The concrete cluster path
  * @param attributes           The attributes that need to be migrated
  * @param storageDelegate      The storage delegate used for persistence
