@@ -63,7 +63,7 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
  * @param attributeBufferSize  The size of the buffer to use to as swap memory between providers
  * @param cluster              The concrete cluster path
  * @param attributes           The attributes that need to be migrated
- * @param storageDelegate      The
+ * @param storageDelegate      The storage delegate used for persistence
  *
  * @return CHIP_NO_ERROR                        On successful migration.
  *         CHIP_ERROR_BUFFER_TOO_SMALL          Value was too big to swap using the chosen buffer size
