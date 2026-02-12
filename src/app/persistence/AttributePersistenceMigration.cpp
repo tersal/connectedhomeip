@@ -1,4 +1,7 @@
 #include <app/persistence/AttributePersistenceMigration.h>
+
+#include <iostream>
+
 namespace chip::app {
 
 CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceProvider & safeProvider,
@@ -18,8 +21,9 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
         // Create a copy of the buffer to check if the value is already in the AttributePersistence
         // If the attribute value is already stored in AttributePersistence, skip it.
         MutableByteSpan readAttrBuffer = buffer;
-        if (normProvider.ReadValue(attrPath, readAttrBuffer) == CHIP_NO_ERROR)
+        if (normProvider.ReadValue(attrPath, readAttrBuffer) != CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND)
         {
+            std::cout << "I'm Here" << std::endl;
             continue;
         }
 

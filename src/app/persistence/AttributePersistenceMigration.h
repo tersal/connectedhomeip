@@ -16,9 +16,9 @@
 
 #pragma once
 #include <app/DefaultSafeAttributePersistenceProvider.h>
-#include <app/persistence/DefaultAttributePersistenceProvider.h>
-
 #include <app/persistence/AttributePersistence.h>
+#include <app/persistence/DefaultAttributePersistenceProvider.h>
+#include <lib/support/logging/CHIPLogging.h>
 
 #include <cstring>
 
@@ -35,6 +35,8 @@ using AttrMigrationData     = std::pair<const AttributeId, SafeAttributeMigrator
  * When a value is found, it is always deleted from the safe provider after the read, regardless of whether
  * the write to the standard provider succeeds. This ensures each attribute is only migrated once and avoids
  * overwriting newer runtime values with stale persisted data on subsequent startups.
+ * 
+ * The user should ensure that the provided buffer has enough capacity for the attributes to be migrated.
  *
  * @param safeProvider A SafeAttributePersistenceProvider implementation to migrate from.
  * @param normProvider A standard AttributePersistenceProvider implementation to migrate to.
@@ -43,13 +45,8 @@ using AttrMigrationData     = std::pair<const AttributeId, SafeAttributeMigrator
  * @param buffer       An internal buffer used for temporary storage between the providers
  *
  * @return CHIP_NO_ERROR                        On successful migration.
- *         CHIP_ERROR_BUFFER_TOO_SMALL          Value was too big to swap using the chosen buffer size
+ *         CHIP_ERROR_HAD_FAILURES              There were errors during migration, some attributes might not be migrated.
  *
- *         If the code uses the default implementation the migration can only fail on long strings/lists (choose a bigger
- * buffer)
- *
- *         Other errors are dependent of implementations of the providers, on any error it will continue
- *         and return last error encountered
  */
 CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceProvider & safeProvider,
                                                        AttributePersistenceProvider & normProvider,
@@ -68,13 +65,8 @@ CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(SafeAttributePersistenceP
  * @param storageDelegate      The storage delegate used for persistence
  *
  * @return CHIP_NO_ERROR                        On successful migration.
- *         CHIP_ERROR_BUFFER_TOO_SMALL          Value was too big to swap using the chosen buffer size
+ *         CHIP_ERROR_HAD_FAILURES              There were errors during migration, some attributes might not be migrated.
  *
- *         If the code uses the default implementation the migration should only fail on long strings/lists (choose a bigger
- * buffer)
- *
- *         Other errors are dependent of implementations of the providers, on any error it will continue
- *         and return last error encountered
  */
 template <int attributeBufferSize = 255>
 CHIP_ERROR MigrateFromSafeAttributePersistenceProvider(const ConcreteClusterPath & cluster,
@@ -98,6 +90,8 @@ namespace DefaultMigrators {
 template <class T>
 static CHIP_ERROR ScalarValue(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider, MutableByteSpan & buffer)
 {
+    VerifyOrReturnError(sizeof(T) < buffer.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
+
     T value;
     ReturnErrorOnFailure(provider.ReadScalarValue(attrPath, value));
     buffer.reduce_size(sizeof(T));
