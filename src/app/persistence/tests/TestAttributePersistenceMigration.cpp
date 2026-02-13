@@ -28,6 +28,20 @@ namespace {
 using namespace chip;
 using namespace chip::app;
 
+// Used by TestMigrationDeletesFromSafeOnWriteFailure to poison the normal-provider
+// key after the initial ReadValue check has already passed.
+TestPersistentStorageDelegate * sStorageDelegateForPoisoning = nullptr;
+
+CHIP_ERROR PoisonAfterReadMigrator(ConcreteAttributePath attrPath, SafeAttributePersistenceProvider & provider,
+                                   MutableByteSpan & buffer)
+{
+    CHIP_ERROR err = DefaultMigrators::ScalarValue<uint32_t>(attrPath, provider, buffer);
+    // Poison the normal provider key now, after ReadValue already returned CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND
+    sStorageDelegateForPoisoning->AddPoisonKey(
+        DefaultStorageKeyAllocator::AttributeValue(attrPath.mEndpointId, attrPath.mClusterId, attrPath.mAttributeId).KeyName());
+    return err;
+}
+
 // Single attribute migrated successfully: value appears in AttributePersistence, deleted from SafeAttribute.
 TEST(TestAttributePersistenceMigration, TestMigrationSuccess)
 {
@@ -103,9 +117,14 @@ TEST(TestAttributePersistenceMigration, TestMigrationSkipsAbsentAttribute)
 }
 
 // When WriteValue to AttributePersistence fails, the value is still deleted from SafeAttribute ("one time" migration guarantee).
+// Uses a custom migrator (PoisonAfterReadMigrator) that poisons the normal provider key after the migrator runs, so that the
+// initial ReadValue check passes (returns CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND) but the subsequent WriteValue 
+// hits the poisoned key and fails.
 TEST(TestAttributePersistenceMigration, TestMigrationDeletesFromSafeOnWriteFailure)
 {
     TestPersistentStorageDelegate storageDelegate;
+    sStorageDelegateForPoisoning = &storageDelegate;
+
     DefaultAttributePersistenceProvider ramProvider;
     DefaultSafeAttributePersistenceProvider safeRamProvider;
     ASSERT_EQ(ramProvider.Init(&storageDelegate), CHIP_NO_ERROR);
@@ -118,11 +137,10 @@ TEST(TestAttributePersistenceMigration, TestMigrationDeletesFromSafeOnWriteFailu
     // Store a value in the safe provider
     ASSERT_EQ(safeRamProvider.WriteScalarValue(path, kValueToStore), CHIP_NO_ERROR);
 
-    // Poison the normal provider key so WriteValue fails
-    storageDelegate.AddPoisonKey(DefaultStorageKeyAllocator::AttributeValue(1, 2, 3).KeyName());
-
+    // PoisonAfterReadMigrator will poison the normal-provider key after reading
+    // from the safe provider, so WriteValue will fail while ReadValue passed.
     const AttrMigrationData attributesToMigrate[] = {
-        { 3, &DefaultMigrators::ScalarValue<uint32_t> },
+        { 3, &PoisonAfterReadMigrator },
     };
     uint8_t buf[128] = {};
     MutableByteSpan buffer(buf);
@@ -135,6 +153,8 @@ TEST(TestAttributePersistenceMigration, TestMigrationDeletesFromSafeOnWriteFailu
         MutableByteSpan readBuffer(readBuf);
         EXPECT_EQ(safeRamProvider.SafeReadValue(path, readBuffer), CHIP_ERROR_PERSISTED_STORAGE_VALUE_NOT_FOUND);
     }
+
+    sStorageDelegateForPoisoning = nullptr;
 }
 
 // After a successful migration, calling it again is a no-op (value already deleted from SafeAttribute).
