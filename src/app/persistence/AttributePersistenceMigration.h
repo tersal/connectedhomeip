@@ -36,7 +36,7 @@ using AttrMigrationData     = std::pair<const AttributeId, SafeAttributeMigrator
  * When a value is found, it is always deleted from the safe provider after the read, regardless of whether
  * the write to the standard provider succeeds. This ensures each attribute is only migrated once and avoids
  * overwriting newer runtime values with stale persisted data on subsequent startups.
- * 
+ *
  * The user should ensure that the provided buffer has enough capacity for the attributes to be migrated.
  *
  * @param safeProvider A SafeAttributePersistenceProvider implementation to migrate from.
