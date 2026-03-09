@@ -15,7 +15,11 @@
  *    limitations under the License.
  */
 #include <app-common/zap-generated/attributes/Accessors.h>
+#include <app/DefaultSafeAttributePersistenceProvider.h>
 #include <app/clusters/boolean-state-configuration-server/BooleanStateConfigurationCluster.h>
+#include <app/clusters/boolean-state-configuration-server/MigrateBooleanStateConfigurationServerStorage.h>
+#include <app/persistence/DefaultAttributePersistenceProvider.h>
+#include <app/server/Server.h>
 #include <app/static-cluster-config/BooleanStateConfiguration.h>
 #include <app/util/attribute-storage.h>
 #include <app/util/endpoint-config-api.h>
@@ -85,6 +89,13 @@ public:
 
 void MatterBooleanStateConfigurationClusterInitCallback(EndpointId endpointId)
 {
+    // Migrate attributes for this cluster from SafeAttribute to AttributePersistence
+    DefaultSafeAttributePersistenceProvider safeProvider;
+    LogErrorOnFailure(safeProvider.Init(&Server::GetInstance().GetPersistentStorage()));
+    DefaultAttributePersistenceProvider dstProvider;
+    LogErrorOnFailure(dstProvider.Init(&Server::GetInstance().GetPersistentStorage()));
+    LogErrorOnFailure(MigrateBooleanStateConfigurationServerStorage(endpointId, safeProvider, dstProvider));
+
     IntegrationDelegate integrationDelegate;
 
     CodegenClusterIntegration::RegisterServer(

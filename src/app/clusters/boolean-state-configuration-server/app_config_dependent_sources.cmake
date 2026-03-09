@@ -18,6 +18,8 @@ TARGET_SOURCES(
   PRIVATE
     "${CLUSTER_DIR}/CodegenIntegration.cpp"
     "${CLUSTER_DIR}/CodegenIntegration.h"
+    "${CLUSTER_DIR}/MigrateBooleanStateConfigurationServerStorage.cpp"
+    "${CLUSTER_DIR}/MigrateBooleanStateConfigurationServerStorage.h"
 )
 
 # These are the things that BUILD.gn dependencies would pull

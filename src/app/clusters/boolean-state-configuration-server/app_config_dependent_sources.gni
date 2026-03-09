@@ -17,4 +17,6 @@ app_config_dependent_sources = [
   "CodegenIntegration.cpp",
   "CodegenIntegration.h",
   "boolean-state-configuration-server.h",
+  "MigrateBooleanStateConfigurationServerStorage.cpp",
+  "MigrateBooleanStateConfigurationServerStorage.h",
 ]
