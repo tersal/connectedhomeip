@@ -23,7 +23,7 @@
 #include "ChimeCluster.h"
 
 #include <app/EventLogging.h>
-#include <app/SafeAttributePersistenceProvider.h>
+#include <app/persistence/AttributePersistence.h>
 #include <app/server-cluster/AttributeListBuilder.h>
 #include <clusters/Chime/Attributes.h>
 #include <clusters/Chime/Commands.h>
@@ -80,16 +80,16 @@ CHIP_ERROR ChimeCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBu
     return listBuilder.Append(Span(Chime::Attributes::kMandatoryMetadata), {});
 }
 
-// TODO: Migrate to use context.attributeStorage instead of SafeAttributePersistenceProvider
 void ChimeCluster::LoadPersistentAttributes()
 {
+    AttributePersistence attrPersistence{ DefaultServerCluster::mContext->attributeStorage };
+
     // Load Active Chime ID
-    uint8_t storedSelectedChime = 0;
-    CHIP_ERROR err              = mContext.safeAttributePersistenceProvider.ReadScalarValue(
-        ConcreteAttributePath(mPath.mEndpointId, Chime::Id, SelectedChime::Id), storedSelectedChime);
-    if (err == CHIP_NO_ERROR)
+    const uint8_t defaultSelectedChime = mSelectedChime;
+    if (attrPersistence.LoadNativeEndianValue<uint8_t>(
+            ConcreteAttributePath(mPath.mEndpointId, Chime::Id, SelectedChime::Id), mSelectedChime, defaultSelectedChime))
     {
-        mSelectedChime = storedSelectedChime;
+        ChipLogDetail(Zcl, "Chime: Loaded SelectedChime: %u", mSelectedChime);
     }
     else
     {
@@ -98,12 +98,11 @@ void ChimeCluster::LoadPersistentAttributes()
     }
 
     // Load Enabled
-    bool storedEnabled = false;
-    err                = mContext.safeAttributePersistenceProvider.ReadScalarValue(
-        ConcreteAttributePath(mPath.mEndpointId, Chime::Id, Enabled::Id), storedEnabled);
-    if (err == CHIP_NO_ERROR)
+    const bool defaultEnabled = mEnabled;
+    if (attrPersistence.LoadNativeEndianValue<bool>(
+            ConcreteAttributePath(mPath.mEndpointId, Chime::Id, Enabled::Id), mEnabled, defaultEnabled))
     {
-        mEnabled = storedEnabled;
+        ChipLogDetail(Zcl, "Chime: Loaded Enabled: %u", mEnabled);
     }
     else
     {
@@ -223,28 +222,23 @@ DataModel::ActionReturnStatus ChimeCluster::WriteAttribute(const DataModel::Writ
 
 Status ChimeCluster::SetSelectedChime(uint8_t chimeID)
 {
-    if (!IsSupportedChimeID(chimeID))
-    {
-        return Protocols::InteractionModel::Status::NotFound;
-    }
-    if (SetAttributeValue(mSelectedChime, chimeID, Attributes::SelectedChime::Id))
-    {
-        // TODO: Migrate to use context.attributeStorage
-        TEMPORARY_RETURN_IGNORED mContext.safeAttributePersistenceProvider.WriteScalarValue(
-            { mPath.mEndpointId, Chime::Id, Attributes::SelectedChime::Id }, mSelectedChime);
-    }
-    return Protocols::InteractionModel::Status::Success;
+    VerifyOrReturnError(DefaultServerCluster::mContext != nullptr, Status::InvalidInState);
+    VerifyOrReturnValue(IsSupportedChimeID(chimeID), Status::NotFound);
+    VerifyOrReturnValue(SetAttributeValue(mSelectedChime, chimeID, Attributes::SelectedChime::Id), Status::Success);
+
+    return DefaultServerCluster::mContext->attributeStorage.WriteValue(
+            ConcreteAttributePath(mPath.mEndpointId, Chime::Id, Attributes::SelectedChime::Id),
+            { reinterpret_cast<const uint8_t *>(&mSelectedChime), sizeof(mSelectedChime) }) == CHIP_NO_ERROR ? Status::Success : Status::Failure;
 }
 
 Status ChimeCluster::SetEnabled(bool enabled)
 {
-    if (SetAttributeValue(mEnabled, enabled, Attributes::Enabled::Id))
-    {
-        // TODO: Migrate to use context.attributeStorage
-        TEMPORARY_RETURN_IGNORED mContext.safeAttributePersistenceProvider.WriteScalarValue(
-            { mPath.mEndpointId, Chime::Id, Attributes::Enabled::Id }, mEnabled);
-    }
-    return Protocols::InteractionModel::Status::Success;
+    VerifyOrReturnError(DefaultServerCluster::mContext != nullptr, Status::InvalidInState);
+    VerifyOrReturnValue(SetAttributeValue(mEnabled, enabled, Attributes::Enabled::Id), Status::Success);
+
+    return DefaultServerCluster::mContext->attributeStorage.WriteValue(
+            ConcreteAttributePath(mPath.mEndpointId, Chime::Id, Attributes::Enabled::Id),
+            { reinterpret_cast<const uint8_t *>(&mEnabled), sizeof(mEnabled) }) == CHIP_NO_ERROR ? Status::Success : Status::Failure;
 }
 
 std::optional<DataModel::ActionReturnStatus> ChimeCluster::InvokeCommand(const DataModel::InvokeRequest & request,

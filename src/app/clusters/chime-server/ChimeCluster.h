@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <app/SafeAttributePersistenceProvider.h>
 #include <app/server-cluster/DefaultServerCluster.h>
 #include <clusters/Chime/Attributes.h>
 #include <clusters/Chime/Commands.h>
@@ -36,7 +35,6 @@ public:
     struct Context
     {
         ChimeDelegate & delegate;
-        SafeAttributePersistenceProvider & safeAttributePersistenceProvider;
     };
 
     /**

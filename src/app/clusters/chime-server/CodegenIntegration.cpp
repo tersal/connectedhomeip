@@ -16,13 +16,17 @@
  */
 
 #include "CodegenIntegration.h"
-#include <app/SafeAttributePersistenceProvider.h>
+#include <app/DefaultSafeAttributePersistenceProvider.h>
 #include <app/clusters/chime-server/ChimeCluster.h>
+#include <app/clusters/chime-server/MigrateChimeServerStorage.h>
+#include <app/persistence/DefaultAttributePersistenceProvider.h>
+#include <app/server/Server.h>
 #include <data-model-providers/codegen/CodegenDataModelProvider.h>
 #include <lib/support/CodeUtils.h>
 
 using namespace chip;
 using namespace chip::app;
+using namespace chip::app::Clusters;
 using chip::app::Clusters::ChimeServer;
 
 ChimeServer::ChimeServer(EndpointId endpointId, ChimeDelegate & delegate) : mEndpointId(endpointId), mDelegate(&delegate) {}
@@ -37,10 +41,7 @@ ChimeServer::~ChimeServer()
 
 CHIP_ERROR ChimeServer::Init()
 {
-    SafeAttributePersistenceProvider * provider = GetSafeAttributePersistenceProvider();
-    VerifyOrReturnError(provider != nullptr, CHIP_ERROR_INCORRECT_STATE);
-
-    ChimeCluster::Context context{ .delegate = *mDelegate, .safeAttributePersistenceProvider = *provider };
+    ChimeCluster::Context context{ .delegate = *mDelegate };
     mCluster.Create(mEndpointId, context);
     return CodegenDataModelProvider::Instance().Registry().Register(mCluster.Registration());
 }
@@ -69,7 +70,15 @@ bool ChimeServer::GetEnabled() const
     return mCluster.Cluster().GetEnabled();
 }
 
-void MatterChimeClusterInitCallback(EndpointId) {}
+void MatterChimeClusterInitCallback(EndpointId endpointId)
+{
+    // Migrate attributes for this cluster from SafeAttribute to AttributePersistence
+    DefaultSafeAttributePersistenceProvider safeProvider;
+    LogErrorOnFailure(safeProvider.Init(&Server::GetInstance().GetPersistentStorage()));
+    DefaultAttributePersistenceProvider dstProvider;
+    LogErrorOnFailure(dstProvider.Init(&Server::GetInstance().GetPersistentStorage()));
+    LogErrorOnFailure(Chime::MigrateChimeServerStorage(endpointId, safeProvider, dstProvider));
+}
 void MatterChimeClusterShutdownCallback(EndpointId, MatterClusterShutdownType) {}
 
 // Stub callbacks for ZAP generated code

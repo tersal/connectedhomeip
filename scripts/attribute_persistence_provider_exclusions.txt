@@ -31,7 +31,6 @@ src/app/clusters/boolean-state-configuration-server/boolean-state-configuration-
 src/app/clusters/boolean-state-configuration-server/tests/TestBooleanStateConfigurationCluster.cpp
 src/app/clusters/camera-av-settings-user-level-management-server/camera-av-settings-user-level-management-server.h
 src/app/clusters/camera-av-stream-management-server/camera-av-stream-management-server.h
-src/app/clusters/chime-server/chime-server.cpp
 src/app/clusters/mode-base-server/mode-base-server.cpp
 src/app/clusters/resource-monitoring-server/ResourceMonitoringCluster.cpp
 src/app/clusters/resource-monitoring-server/tests/TestResourceMonitoringCluster.cpp
