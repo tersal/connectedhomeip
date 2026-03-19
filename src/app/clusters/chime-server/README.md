@@ -69,12 +69,8 @@ requires it. Using `RegisteredServerCluster` simplifies registration.
 // In a .cpp file
 MyChimeDelegate gMyChimeDelegate;
 
-chip::app::Clusters::ChimeCluster::Context chimeContext{
-    .delegate = gMyChimeDelegate,
-};
-
 chip::app::RegisteredServerCluster<chip::app::Clusters::ChimeCluster> gChimeCluster(
-    chip::EndpointId{ 1 }, chimeContext);
+    chip::EndpointId{ 1 }, gMyChimeDelegate);
 ```
 
 ### 3. Register the Cluster
