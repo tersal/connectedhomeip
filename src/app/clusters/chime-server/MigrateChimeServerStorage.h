@@ -19,7 +19,6 @@
 #pragma once
 
 #include <app/clusters/chime-server/ChimeCluster.h>
-#include <app/persistence/AttributePersistenceMigration.h>
 
 namespace chip {
 namespace app {
