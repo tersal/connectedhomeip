@@ -94,8 +94,7 @@ struct TestChimeCluster : public ::testing::Test
 
     MockChimeDelegate mMockDelegate;
 
-    ChimeCluster mCluster{ kTestEndpointId,
-                           ChimeCluster::Context{ .delegate = mMockDelegate } };
+    ChimeCluster mCluster{ kTestEndpointId, mMockDelegate };
 
     ClusterTester mClusterTester{ mCluster };
 };
@@ -254,9 +253,7 @@ TEST_F(TestChimeCluster, TestPersistence)
 
     // 1. Initial startup, verify default values
     {
-        ChimeCluster cluster(
-            kTestEndpointId,
-            ChimeCluster::Context{ .delegate = mockDelegate });
+        ChimeCluster cluster(kTestEndpointId, mockDelegate);
         EXPECT_EQ(cluster.Startup(context.Get()), CHIP_NO_ERROR);
         ClusterTester tester(cluster);
 
@@ -275,9 +272,7 @@ TEST_F(TestChimeCluster, TestPersistence)
 
     // 2. Restart (create new cluster instance), verify modified values are loaded
     {
-        ChimeCluster cluster(
-            kTestEndpointId,
-            ChimeCluster::Context{ .delegate = mockDelegate });
+        ChimeCluster cluster(kTestEndpointId, mockDelegate);
         EXPECT_EQ(cluster.Startup(context.Get()), CHIP_NO_ERROR);
         chip::Testing::ClusterTester tester(cluster);
 

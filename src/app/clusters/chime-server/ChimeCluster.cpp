@@ -44,15 +44,15 @@ namespace chip {
 namespace app {
 namespace Clusters {
 
-ChimeCluster::ChimeCluster(EndpointId endpointId, const Context & context) :
-    DefaultServerCluster({ endpointId, Chime::Id }), mContext(context)
+ChimeCluster::ChimeCluster(EndpointId endpointId, ChimeDelegate & delegate) :
+    DefaultServerCluster({ endpointId, Chime::Id }), mDelegate(delegate)
 {
-    mContext.delegate.SetChimeCluster(this);
+    mDelegate.SetChimeCluster(this);
 }
 
 ChimeCluster::~ChimeCluster()
 {
-    mContext.delegate.SetChimeCluster(nullptr);
+    mDelegate.SetChimeCluster(nullptr);
 }
 
 CHIP_ERROR ChimeCluster::Startup(ServerClusterContext & context)
@@ -82,7 +82,7 @@ CHIP_ERROR ChimeCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBu
 
 void ChimeCluster::LoadPersistentAttributes()
 {
-    AttributePersistence attrPersistence{ DefaultServerCluster::mContext->attributeStorage };
+    AttributePersistence attrPersistence{ mContext->attributeStorage };
 
     // Load Active Chime ID
     const uint8_t defaultSelectedChime = mSelectedChime;
@@ -155,7 +155,7 @@ CHIP_ERROR ChimeCluster::EncodeSupportedChimeSounds(const AttributeValueEncoder:
         // CopyCharSpanToMutableCharSpan to copy data in
         char buffer[kMaxChimeSoundNameSize];
         MutableCharSpan name(buffer);
-        auto err = mContext.delegate.GetChimeSoundByIndex(i, chimeSound.chimeID, name);
+        auto err = mDelegate.GetChimeSoundByIndex(i, chimeSound.chimeID, name);
 
         // return if we've run off the end of the Chime Sound List on the delegate
         if (err == CHIP_ERROR_PROVIDER_LIST_EXHAUSTED)
@@ -184,7 +184,7 @@ CHIP_ERROR ChimeCluster::EncodeSupportedChimeSounds(const AttributeValueEncoder:
 bool ChimeCluster::IsSupportedChimeID(uint8_t chimeID)
 {
     uint8_t supportedChimeID;
-    for (uint8_t i = 0; mContext.delegate.GetChimeIDByIndex(i, supportedChimeID) != CHIP_ERROR_PROVIDER_LIST_EXHAUSTED; i++)
+    for (uint8_t i = 0; mDelegate.GetChimeIDByIndex(i, supportedChimeID) != CHIP_ERROR_PROVIDER_LIST_EXHAUSTED; i++)
     {
         if (supportedChimeID == chimeID)
         {
@@ -222,21 +222,21 @@ DataModel::ActionReturnStatus ChimeCluster::WriteAttribute(const DataModel::Writ
 
 Status ChimeCluster::SetSelectedChime(uint8_t chimeID)
 {
-    VerifyOrReturnError(DefaultServerCluster::mContext != nullptr, Status::InvalidInState);
+    VerifyOrReturnError(mContext != nullptr, Status::InvalidInState);
     VerifyOrReturnValue(IsSupportedChimeID(chimeID), Status::NotFound);
     VerifyOrReturnValue(SetAttributeValue(mSelectedChime, chimeID, Attributes::SelectedChime::Id), Status::Success);
 
-    return DefaultServerCluster::mContext->attributeStorage.WriteValue(
+    return mContext->attributeStorage.WriteValue(
             ConcreteAttributePath(mPath.mEndpointId, Chime::Id, Attributes::SelectedChime::Id),
             { reinterpret_cast<const uint8_t *>(&mSelectedChime), sizeof(mSelectedChime) }) == CHIP_NO_ERROR ? Status::Success : Status::Failure;
 }
 
 Status ChimeCluster::SetEnabled(bool enabled)
 {
-    VerifyOrReturnError(DefaultServerCluster::mContext != nullptr, Status::InvalidInState);
+    VerifyOrReturnError(mContext != nullptr, Status::InvalidInState);
     VerifyOrReturnValue(SetAttributeValue(mEnabled, enabled, Attributes::Enabled::Id), Status::Success);
 
-    return DefaultServerCluster::mContext->attributeStorage.WriteValue(
+    return mContext->attributeStorage.WriteValue(
             ConcreteAttributePath(mPath.mEndpointId, Chime::Id, Attributes::Enabled::Id),
             { reinterpret_cast<const uint8_t *>(&mEnabled), sizeof(mEnabled) }) == CHIP_NO_ERROR ? Status::Success : Status::Failure;
 }
@@ -283,7 +283,7 @@ DataModel::ActionReturnStatus ChimeCluster::HandlePlayChimeSound(CommandHandler 
         chimeIDToUse = commandData.chimeID.Value();
     }
 
-    Status status = mContext.delegate.PlayChimeSound(chimeIDToUse);
+    Status status = mDelegate.PlayChimeSound(chimeIDToUse);
     if (status == Status::Success)
     {
         // Generate the event

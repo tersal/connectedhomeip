@@ -41,8 +41,15 @@ ChimeServer::~ChimeServer()
 
 CHIP_ERROR ChimeServer::Init()
 {
-    ChimeCluster::Context context{ .delegate = *mDelegate };
-    mCluster.Create(mEndpointId, context);
+    VerifyOrReturnError(mDelegate != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    // Migrate attributes for this cluster from SafeAttribute to AttributePersistence
+    DefaultSafeAttributePersistenceProvider safeProvider;
+    LogErrorOnFailure(safeProvider.Init(&Server::GetInstance().GetPersistentStorage()));
+    DefaultAttributePersistenceProvider dstProvider;
+    LogErrorOnFailure(dstProvider.Init(&Server::GetInstance().GetPersistentStorage()));
+    LogErrorOnFailure(Chime::MigrateChimeServerStorage(mEndpointId, safeProvider, dstProvider));
+
+    mCluster.Create(mEndpointId, *mDelegate);
     return CodegenDataModelProvider::Instance().Registry().Register(mCluster.Registration());
 }
 
@@ -70,15 +77,7 @@ bool ChimeServer::GetEnabled() const
     return mCluster.Cluster().GetEnabled();
 }
 
-void MatterChimeClusterInitCallback(EndpointId endpointId)
-{
-    // Migrate attributes for this cluster from SafeAttribute to AttributePersistence
-    DefaultSafeAttributePersistenceProvider safeProvider;
-    LogErrorOnFailure(safeProvider.Init(&Server::GetInstance().GetPersistentStorage()));
-    DefaultAttributePersistenceProvider dstProvider;
-    LogErrorOnFailure(dstProvider.Init(&Server::GetInstance().GetPersistentStorage()));
-    LogErrorOnFailure(Chime::MigrateChimeServerStorage(endpointId, safeProvider, dstProvider));
-}
+void MatterChimeClusterInitCallback(EndpointId endpointId) {}
 void MatterChimeClusterShutdownCallback(EndpointId, MatterClusterShutdownType) {}
 
 // Stub callbacks for ZAP generated code
