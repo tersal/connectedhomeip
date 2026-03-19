@@ -14,8 +14,8 @@
  *    limitations under the License.
  *
  */
-#include <app/clusters/boolean-state-configuration-server/MigrateBooleanStateConfigurationServerStorage.h>
 #include <app/clusters/boolean-state-configuration-server/BooleanStateConfigurationCluster.h>
+#include <app/clusters/boolean-state-configuration-server/MigrateBooleanStateConfigurationServerStorage.h>
 
 namespace chip {
 namespace app {
@@ -23,13 +23,13 @@ namespace Clusters {
 namespace BooleanStateConfiguration {
 
 CHIP_ERROR MigrateBooleanStateConfigurationServerStorage(EndpointId endpointId, SafeAttributePersistenceProvider & safeProvider,
-                                                AttributePersistenceProvider & dstProvider)
+                                                         AttributePersistenceProvider & dstProvider)
 {
     static constexpr AttrMigrationData attributesToUpdate[] = { { Attributes::CurrentSensitivityLevel::Id,
                                                                   &DefaultMigrators::ScalarValue<uint8_t> } };
 
     // We need to provide a buffer with enough space for the largest of the attributes that will be migrated.
-    using LargestAttributeType = uint8_t;
+    using LargestAttributeType                            = uint8_t;
     uint8_t attributeBuffer[sizeof(LargestAttributeType)] = {};
     MutableByteSpan buffer(attributeBuffer);
     return MigrateFromSafeToAttributePersistenceProvider(safeProvider, dstProvider, { endpointId, BooleanStateConfiguration::Id },

@@ -27,7 +27,7 @@ namespace Clusters {
 namespace BooleanStateConfiguration {
 
 CHIP_ERROR MigrateBooleanStateConfigurationServerStorage(EndpointId endpointId, SafeAttributePersistenceProvider & safeProvider,
-                                                AttributePersistenceProvider & dstProvider);
+                                                         AttributePersistenceProvider & dstProvider);
 } // namespace BooleanStateConfiguration
 } // namespace Clusters
 } // namespace app

@@ -95,7 +95,7 @@ CHIP_ERROR BooleanStateConfigurationCluster::Startup(ServerClusterContext & cont
     AttributePersistence attributePersistence(context.attributeStorage);
 
     attributePersistence.LoadNativeEndianValue({ mPath.mEndpointId, mPath.mClusterId, CurrentSensitivityLevel::Id },
-                                              mCurrentSensitivityLevel, mDefaultSensitivityLevel);
+                                               mCurrentSensitivityLevel, mDefaultSensitivityLevel);
 
     if (mCurrentSensitivityLevel >= mSupportedSensitivityLevels)
     {
@@ -331,9 +331,8 @@ CHIP_ERROR BooleanStateConfigurationCluster::SetCurrentSensitivityLevel(uint8_t 
     mCurrentSensitivityLevel = level;
     NotifyAttributeChanged(CurrentSensitivityLevel::Id);
 
-    return mContext->attributeStorage.WriteValue(
-        { mPath.mEndpointId, mPath.mClusterId, CurrentSensitivityLevel::Id },
-        { &mCurrentSensitivityLevel, sizeof(mCurrentSensitivityLevel) });
+    return mContext->attributeStorage.WriteValue({ mPath.mEndpointId, mPath.mClusterId, CurrentSensitivityLevel::Id },
+                                                 { &mCurrentSensitivityLevel, sizeof(mCurrentSensitivityLevel) });
 }
 
 Status BooleanStateConfigurationCluster::SetAlarmsActive(AlarmModeBitMask alarms)
