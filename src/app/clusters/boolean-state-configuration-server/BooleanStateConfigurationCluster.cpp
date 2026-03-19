@@ -333,7 +333,7 @@ CHIP_ERROR BooleanStateConfigurationCluster::SetCurrentSensitivityLevel(uint8_t 
 
     return mContext->attributeStorage.WriteValue(
         { mPath.mEndpointId, mPath.mClusterId, CurrentSensitivityLevel::Id },
-        { reinterpret_cast<const uint8_t *>(&mCurrentSensitivityLevel), sizeof(mCurrentSensitivityLevel) });
+        { &mCurrentSensitivityLevel, sizeof(mCurrentSensitivityLevel) });
 }
 
 Status BooleanStateConfigurationCluster::SetAlarmsActive(AlarmModeBitMask alarms)
