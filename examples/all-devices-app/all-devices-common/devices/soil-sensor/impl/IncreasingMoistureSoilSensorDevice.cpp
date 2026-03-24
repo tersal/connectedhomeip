@@ -56,7 +56,7 @@ IncreasingMoistureSoilSensorDevice::~IncreasingMoistureSoilSensorDevice()
 CHIP_ERROR IncreasingMoistureSoilSensorDevice::Register(EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
 {
     ReturnErrorOnFailure(SoilSensorDevice::Register(endpoint, provider, parentId));
-    // Kick off the timer loop to flip occupancy every few seconds
+    // Kick off the timer loop to increase moisture every few seconds
     return mTimerDelegate.StartTimer(this, kIncreaseMoistureIntervalSec);
 }
 
@@ -69,19 +69,21 @@ void IncreasingMoistureSoilSensorDevice::Unregister(CodeDrivenDataModelProvider 
 
 void IncreasingMoistureSoilSensorDevice::TimerFired()
 {
-    static SoilMeasurement::Attributes::SoilMoistureMeasuredValue::TypeInfo::Type soilMoistureMeasuredValue;
-
-    if(soilMoistureMeasuredValue.IsNull())
+    if (mSoilMoistureMeasuredValue.IsNull())
     {
-        soilMoistureMeasuredValue.SetNonNull(1U);
+        mSoilMoistureMeasuredValue.SetNonNull(kDefaultSoilMoistureMeasurementLimits.minMeasuredValue);
+    }
+    else if (mSoilMoistureMeasuredValue.Value() >= kDefaultSoilMoistureMeasurementLimits.maxMeasuredValue)
+    {
+        mSoilMoistureMeasuredValue.SetNonNull(kDefaultSoilMoistureMeasurementLimits.minMeasuredValue);
     }
     else
     {
-        soilMoistureMeasuredValue.SetNonNull(soilMoistureMeasuredValue.Value() + 1U);
+        mSoilMoistureMeasuredValue.SetNonNull(mSoilMoistureMeasuredValue.Value() + 1U);
     }
 
-    ChipLogProgress(AppServer, "IncreasingMoistureValue: Increasing to %d", soilMoistureMeasuredValue.Value());
-    TEMPORARY_RETURN_IGNORED mSoilMeasurementCluster.Cluster().SetSoilMoistureMeasuredValue(soilMoistureMeasuredValue);
+    ChipLogProgress(AppServer, "IncreasingMoistureValue: Increasing to %d", mSoilMoistureMeasuredValue.Value());
+    LogErrorOnFailure(mSoilMeasurementCluster.Cluster().SetSoilMoistureMeasuredValue(mSoilMoistureMeasuredValue));
 
     VerifyOrDie(mTimerDelegate.StartTimer(this, kIncreaseMoistureIntervalSec) == CHIP_NO_ERROR);
 }

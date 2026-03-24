@@ -25,7 +25,7 @@ namespace chip {
 namespace app {
 
 /**
- * @brief An implementation of an Occupancy Sensor Device.
+ * @brief An implementation of a Soil Sensor Device that increases moisture over time.
  *
  */
 class IncreasingMoistureSoilSensorDevice : public SoilSensorDevice, public TimerContext
@@ -43,6 +43,7 @@ public:
 
 private:
     DefaultTimerDelegate mTimerDelegate;
+    Clusters::SoilMeasurement::Attributes::SoilMoistureMeasuredValue::TypeInfo::Type mSoilMoistureMeasuredValue;
 };
 
 } // namespace app
