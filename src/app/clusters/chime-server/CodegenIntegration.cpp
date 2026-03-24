@@ -77,7 +77,7 @@ bool ChimeServer::GetEnabled() const
     return mCluster.Cluster().GetEnabled();
 }
 
-void MatterChimeClusterInitCallback(EndpointId endpointId) {}
+void MatterChimeClusterInitCallback(EndpointId) {}
 void MatterChimeClusterShutdownCallback(EndpointId, MatterClusterShutdownType) {}
 
 // Stub callbacks for ZAP generated code
