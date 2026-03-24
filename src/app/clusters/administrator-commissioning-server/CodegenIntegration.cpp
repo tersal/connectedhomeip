@@ -15,6 +15,7 @@
  *    limitations under the License.
  */
 #include <app/clusters/administrator-commissioning-server/AdministratorCommissioningCluster.h>
+#include <app/server/Server.h>
 #include <app/static-cluster-config/AdministratorCommissioning.h>
 #include <data-model-providers/codegen/ClusterIntegration.h>
 
@@ -58,7 +59,11 @@ public:
     ServerClusterRegistration & CreateRegistration(EndpointId endpointId, unsigned clusterInstanceIndex,
                                                    uint32_t optionalAttributeBits, uint32_t featureMap) override
     {
-        gServer.Create(endpointId, BitFlags<AdministratorCommissioning::Feature>(featureMap));
+        gServer.Create(endpointId, BitFlags<AdministratorCommissioning::Feature>(featureMap),
+                       AdministratorCommissioningCluster::Context{ .commissioningWindowManager =
+                                                                       Server::GetInstance().GetCommissioningWindowManager(),
+                                                                   .fabricTable     = Server::GetInstance().GetFabricTable(),
+                                                                   .failSafeContext = Server::GetInstance().GetFailSafeContext() });
         return gServer.Registration();
     }
 
@@ -72,7 +77,7 @@ public:
 
 } // namespace
 
-void emberAfAdministratorCommissioningClusterServerInitCallback(EndpointId endpointId)
+void MatterAdministratorCommissioningClusterInitCallback(EndpointId endpointId)
 {
     // The implementation of the server we use here is only for the RootNode (i.e. endpoint 0)
     // singleton. Other uses (e.g. fabric sync) will need their own implementations and would be added
@@ -94,7 +99,7 @@ void emberAfAdministratorCommissioningClusterServerInitCallback(EndpointId endpo
         integrationDelegate);
 }
 
-void MatterAdministratorCommissioningClusterServerShutdownCallback(EndpointId endpointId)
+void MatterAdministratorCommissioningClusterShutdownCallback(EndpointId endpointId, MatterClusterShutdownType shutdownType)
 {
     VerifyOrReturn(endpointId == kRootEndpointId);
 
@@ -108,7 +113,7 @@ void MatterAdministratorCommissioningClusterServerShutdownCallback(EndpointId en
             .fixedClusterInstanceCount = AdministratorCommissioning::StaticApplicationConfig::kFixedClusterConfig.size(),
             .maxClusterInstanceCount   = 1, // only root-node functionality supported by this implementation
         },
-        integrationDelegate);
+        integrationDelegate, shutdownType);
 }
 
 void MatterAdministratorCommissioningPluginServerInitCallback() {}

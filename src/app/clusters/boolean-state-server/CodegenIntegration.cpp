@@ -17,7 +17,7 @@
  */
 
 #include "CodegenIntegration.h"
-#include <app/clusters/boolean-state-server/boolean-state-cluster.h>
+#include <app/clusters/boolean-state-server/BooleanStateCluster.h>
 #include <app/static-cluster-config/BooleanState.h>
 #include <app/util/attribute-storage.h>
 #include <data-model-providers/codegen/ClusterIntegration.h>
@@ -57,11 +57,10 @@ public:
 
 } // namespace
 
-void emberAfBooleanStateClusterServerInitCallback(EndpointId endpointId)
+void MatterBooleanStateClusterInitCallback(EndpointId endpointId)
 {
     IntegrationDelegate integrationDelegate;
 
-    // register a singleton server (root endpoint only)
     CodegenClusterIntegration::RegisterServer(
         {
             .endpointId                = endpointId,
@@ -74,11 +73,10 @@ void emberAfBooleanStateClusterServerInitCallback(EndpointId endpointId)
         integrationDelegate);
 }
 
-void MatterBooleanStateClusterServerShutdownCallback(EndpointId endpointId)
+void MatterBooleanStateClusterShutdownCallback(EndpointId endpointId, MatterClusterShutdownType shutdownType)
 {
     IntegrationDelegate integrationDelegate;
 
-    // register a singleton server (root endpoint only)
     CodegenClusterIntegration::UnregisterServer(
         {
             .endpointId                = endpointId,
@@ -86,16 +84,16 @@ void MatterBooleanStateClusterServerShutdownCallback(EndpointId endpointId)
             .fixedClusterInstanceCount = kBooleanStateFixedClusterCount,
             .maxClusterInstanceCount   = kBooleanStateMaxClusterCount,
         },
-        integrationDelegate);
+        integrationDelegate, shutdownType);
 }
 
 namespace chip::app::Clusters::BooleanState {
 
-BooleanStateCluster * GetClusterForEndpointIndex(EndpointId endpointId)
+BooleanStateCluster * FindClusterOnEndpoint(EndpointId endpointId)
 {
     IntegrationDelegate integrationDelegate;
 
-    ServerClusterInterface * booleanState = CodegenClusterIntegration::GetClusterForEndpointIndex(
+    ServerClusterInterface * booleanState = CodegenClusterIntegration::FindClusterOnEndpoint(
         {
             .endpointId                = endpointId,
             .clusterId                 = BooleanState::Id,

@@ -166,7 +166,7 @@ get_quada_records()
         └── addr_resolver.ip_addresses_by_version(...)
                  └── extracts the resulting IPv6 addresses
         ▼
-returns list[QuadaRecord]
+returns list[AaaaRecord]
 ```
 
 #### 🎯 `get_ptr_records`
@@ -239,7 +239,7 @@ exact failing constraint obvious.
 
 You can import them from the following file: `mdns_discovery/utils/asserts.py`
 
-```
+```python
 from mdns_discovery.utils.asserts import assert_valid_dn_key
 
 assert_valid_dn_key("Kitchen")
@@ -263,6 +263,29 @@ assert_valid_dn_key("Kitchen")
 | `assert_valid_sat_key` | `assert_valid_product_id`                   |
 | `assert_valid_t_key`   | `assert_valid_vendor_id`                    |
 | `assert_valid_icd_key` | `assert_valid_hostname`                     |
+
+## 🛜 Network Utilities
+
+This module contains network utility functions to support mDNS-related test
+cases.
+
+You can import them from the following file: `mdns_discovery/utils/network.py`
+
+```python
+from mdns_discovery.utils.network import get_host_ipv6_addresses
+
+addr_list = get_host_ipv6_addresses()
+
+for addr in addr_list:
+    print(addr)
+```
+
+### ✅ Available network utility functions
+
+|                           |
+| ------------------------- |
+| `get_host_ipv6_addresses` |
+| `is_dut_tcp_supported`    |
 
 ## 📌 General Information
 

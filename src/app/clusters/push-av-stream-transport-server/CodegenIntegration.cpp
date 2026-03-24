@@ -15,7 +15,7 @@
  *    limitations under the License.
  */
 #include <app-common/zap-generated/attributes/Accessors.h>
-#include <app/clusters/push-av-stream-transport-server/push-av-stream-transport-cluster.h>
+#include <app/clusters/push-av-stream-transport-server/PushAVStreamTransportCluster.h>
 #include <app/static-cluster-config/PushAvStreamTransport.h>
 #include <app/util/attribute-storage.h>
 #include <data-model-providers/codegen/ClusterIntegration.h>
@@ -59,7 +59,7 @@ public:
 PushAvStreamTransportServer * FindClusterOnEndpoint(EndpointId endpointId)
 {
     IntegrationDelegate integrationDelegate;
-    return static_cast<PushAvStreamTransportServer *>(CodegenClusterIntegration::GetClusterForEndpointIndex(
+    return static_cast<PushAvStreamTransportServer *>(CodegenClusterIntegration::FindClusterOnEndpoint(
         {
             .endpointId                = endpointId,
             .clusterId                 = PushAvStreamTransport::Id,
@@ -70,7 +70,7 @@ PushAvStreamTransportServer * FindClusterOnEndpoint(EndpointId endpointId)
 }
 
 } // namespace
-void emberAfPushAvStreamTransportClusterServerInitCallback(EndpointId endpointId)
+void MatterPushAvStreamTransportClusterInitCallback(EndpointId endpointId)
 {
 
     IntegrationDelegate integrationDelegate;
@@ -87,7 +87,7 @@ void emberAfPushAvStreamTransportClusterServerInitCallback(EndpointId endpointId
         integrationDelegate);
 }
 
-void MatterPushAvStreamTransportClusterServerShutdownCallback(EndpointId endpointId)
+void MatterPushAvStreamTransportClusterShutdownCallback(EndpointId endpointId, MatterClusterShutdownType shutdownType)
 {
     IntegrationDelegate integrationDelegate;
 
@@ -98,7 +98,7 @@ void MatterPushAvStreamTransportClusterServerShutdownCallback(EndpointId endpoin
             .fixedClusterInstanceCount = kPushAvStreamTransportFixedClusterCount,
             .maxClusterInstanceCount   = kPushAvStreamTransportMaxClusterCount,
         },
-        integrationDelegate);
+        integrationDelegate, shutdownType);
 }
 
 void MatterPushAvStreamTransportPluginServerInitCallback() {}
@@ -117,11 +117,11 @@ void SetDelegate(EndpointId endpointId, PushAvStreamTransportDelegate * delegate
     if (PushAvStreamTransportServer * cluster = FindClusterOnEndpoint(endpointId); cluster != nullptr)
     {
         cluster->SetDelegate(delegate);
-        cluster->Init();
+        TEMPORARY_RETURN_IGNORED cluster->Init();
     }
 }
 
-void SetTLSClientManagementDelegate(EndpointId endpointId, TlsClientManagementDelegate * delegate)
+void SetTLSClientManagementDelegate(EndpointId endpointId, TLSClientManagementDelegate * delegate)
 {
     ChipLogProgress(AppServer, "Setting TLS Client Management delegate on endpoint %u", endpointId);
     if (PushAvStreamTransportServer * cluster = FindClusterOnEndpoint(endpointId); cluster != nullptr)
@@ -130,7 +130,7 @@ void SetTLSClientManagementDelegate(EndpointId endpointId, TlsClientManagementDe
     }
 }
 
-void SetTlsCertificateManagementDelegate(EndpointId endpointId, TlsCertificateManagementDelegate * delegate)
+void SetTLSCertificateManagementDelegate(EndpointId endpointId, TLSCertificateManagementDelegate * delegate)
 {
     ChipLogProgress(AppServer, "Setting TLS Certificate Management delegate on endpoint %u", endpointId);
     uint16_t arrayIndex =
@@ -145,7 +145,7 @@ void SetTlsCertificateManagementDelegate(EndpointId endpointId, TlsCertificateMa
         ChipLogError(AppServer, "Push AV Stream transport is NOT yet constructed. Cannot set TLS Certificate Management delegate");
         return;
     }
-    gServers[arrayIndex].Cluster().SetTlsCertificateManagementDelegate(delegate);
+    gServers[arrayIndex].Cluster().SetTLSCertificateManagementDelegate(delegate);
 }
 } // namespace PushAvStreamTransport
 } // namespace Clusters

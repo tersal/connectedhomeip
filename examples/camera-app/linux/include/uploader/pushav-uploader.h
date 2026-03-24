@@ -19,11 +19,14 @@
 #pragma once
 
 #include <atomic>
+#include <condition_variable>
 #include <curl/curl.h>
+#include <filesystem>
 #include <mutex>
 #include <queue>
 #include <string>
 #include <thread>
+#include <unordered_map>
 
 typedef struct UploadDataInfo
 {
@@ -55,7 +58,7 @@ public:
 
     void Start();
     void Stop();
-    void AddUploadData(std::string & filename, std::string & url);
+    void AddUploadData(const std::string & filename, const std::string & url);
     size_t GetUploadQueueSize()
     {
         std::lock_guard<std::mutex> lock(mQueueMutex);
@@ -64,6 +67,7 @@ public:
 
     void setCertificateBuffer(const PushAVCertBuffer & certBuffer) { mCertBuffer = certBuffer; }
     void setCertificatePath(const PushAVCertPath & certPath) { mCertPath = certPath; }
+    void setStreamIdNameMap(const std::vector<std::string> & streamIdNameMap) { mStreamIdNameMap = streamIdNameMap; }
 
 private:
     void ProcessQueue();
@@ -74,4 +78,5 @@ private:
     std::mutex mQueueMutex;
     std::atomic<bool> mIsRunning;
     std::thread mUploaderThread;
+    std::vector<std::string> mStreamIdNameMap;
 };

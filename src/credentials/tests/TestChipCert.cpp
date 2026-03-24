@@ -191,9 +191,19 @@ TEST_F(TestChipCert, TestChipCert_ChipToX509)
     }
 
     // Error Case:
-    MutableByteSpan outCert(outCertBuf);
-    err = ConvertChipCertToX509Cert(sTestCert_Node01_01_Err01_Chip, outCert);
-    EXPECT_EQ(err, CHIP_ERROR_INVALID_TLV_TAG);
+    {
+        MutableByteSpan outCert(outCertBuf);
+        err = ConvertChipCertToX509Cert(sTestCert_Node01_01_Err01_Chip, outCert);
+        EXPECT_EQ(err, CHIP_ERROR_INVALID_TLV_TAG);
+    }
+
+    // For a PDC Identity, converting from the compact form must work too
+    {
+        MutableByteSpan outCert(outCertBuf);
+        err = ConvertChipCertToX509Cert(sTestCert_PDCID01_ChipCompact, outCert);
+        EXPECT_EQ(err, CHIP_NO_ERROR);
+        EXPECT_TRUE(sTestCert_PDCID01_DER.data_equal(outCert));
+    }
 }
 
 TEST_F(TestChipCert, TestChipCert_ChipToX509_ErrorCases)
@@ -344,13 +354,13 @@ TEST_F(TestChipCert, TestChipCert_ChipDN)
 
     CATValues noc_cats2;
     chip::CATValues::Serialized serializedCATs;
-    EXPECT_EQ(noc_cats.Serialize(serializedCATs), CHIP_NO_ERROR);
-    EXPECT_EQ(noc_cats2.Deserialize(serializedCATs), CHIP_NO_ERROR);
+    noc_cats.Serialize(serializedCATs);
+    noc_cats2.Deserialize(serializedCATs);
     EXPECT_EQ(memcmp(&noc_cats, &noc_cats2, chip::CATValues::kSerializedLength), 0);
 
     CATValues noc_cats3 = { { 0xABCD0001, 0xFFEEAA00, 0x0001F012 } };
-    EXPECT_EQ(noc_cats3.Serialize(serializedCATs), CHIP_NO_ERROR);
-    EXPECT_EQ(noc_cats2.Deserialize(serializedCATs), CHIP_NO_ERROR);
+    noc_cats3.Serialize(serializedCATs);
+    noc_cats2.Deserialize(serializedCATs);
     EXPECT_EQ(memcmp(&noc_cats3, &noc_cats2, chip::CATValues::kSerializedLength), 0);
 }
 

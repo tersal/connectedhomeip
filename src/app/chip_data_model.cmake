@@ -148,6 +148,8 @@ function(chip_configure_data_model APP_TARGET)
         "zap-generated/endpoint_config.h"
         "zap-generated/gen_config.h"
         "zap-generated/IMClusterCommandHandler.cpp"
+        "zap-generated/CodeDrivenInitShutdown.cpp"
+        "zap-generated/CodeDrivenCallback.h"
         OUTPUT_PATH APP_TEMPLATES_GEN_DIR
         OUTPUT_FILES APP_TEMPLATES_GEN_FILES
         ZCL_PATH ${ARG_ZCL_PATH}
@@ -161,12 +163,12 @@ function(chip_configure_data_model APP_TARGET)
         ${CHIP_APP_BASE_DIR}/reporting/reporting.cpp
         ${CHIP_APP_BASE_DIR}/util/attribute-storage.cpp
         ${CHIP_APP_BASE_DIR}/util/attribute-table.cpp
-        ${CHIP_APP_BASE_DIR}/util/binding-table.cpp
         ${CHIP_APP_BASE_DIR}/util/DataModelHandler.cpp
         ${CHIP_APP_BASE_DIR}/util/ember-io-storage.cpp
         ${CHIP_APP_BASE_DIR}/util/generic-callback-stubs.cpp
         ${CHIP_APP_BASE_DIR}/util/privilege-storage.cpp
         ${CHIP_APP_BASE_DIR}/util/util.cpp
+        ${CHIP_APP_BASE_DIR}/persistence/AttributePersistenceMigration.cpp
         ${CHIP_APP_BASE_DIR}/persistence/AttributePersistenceProviderInstance.cpp
         ${CHIP_APP_BASE_DIR}/persistence/DefaultAttributePersistenceProvider.cpp
         ${CODEGEN_DATA_MODEL_SOURCES}

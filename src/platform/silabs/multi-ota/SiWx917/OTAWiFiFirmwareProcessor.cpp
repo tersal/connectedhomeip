@@ -26,6 +26,9 @@ extern "C" {
 }
 
 namespace chip {
+namespace DeviceLayer {
+namespace Silabs {
+namespace MultiOTA {
 
 CHIP_ERROR OTAWiFiFirmwareProcessor::ProcessInternal(ByteSpan & block)
 {
@@ -62,7 +65,13 @@ CHIP_ERROR OTAWiFiFirmwareProcessor::ProcessInternal(ByteSpan & block)
         byteBlock.reduce_size(requestedOtaMaxBlockSize);
     }
 
-    OTATlvProcessor::vOtaProcessInternalEncryption(byteBlock);
+    ReturnErrorOnFailure(OTATlvProcessor::vOtaProcessInternalEncryption(byteBlock));
+    if (IsLastBlock())
+    {
+        // Remove padding from the last block since if the file was padded, last block will contain padding bytes.
+        VerifyOrReturnError(OTATlvProcessor::RemovePadding(byteBlock) == CHIP_NO_ERROR, CHIP_ERROR_WRONG_ENCRYPTION_TYPE,
+                            ChipLogError(SoftwareUpdate, "Failed to remove padding"));
+    }
     block = byteBlock;
 #endif // SL_MATTER_ENABLE_OTA_ENCRYPTION
 
@@ -120,4 +129,7 @@ CHIP_ERROR OTAWiFiFirmwareProcessor::ApplyAction()
     return CHIP_NO_ERROR;
 }
 
+} // namespace MultiOTA
+} // namespace Silabs
+} // namespace DeviceLayer
 } // namespace chip
