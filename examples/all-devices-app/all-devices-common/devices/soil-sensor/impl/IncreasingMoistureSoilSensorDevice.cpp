@@ -53,7 +53,8 @@ IncreasingMoistureSoilSensorDevice::~IncreasingMoistureSoilSensorDevice()
     mTimerDelegate.CancelTimer(this);
 }
 
-CHIP_ERROR IncreasingMoistureSoilSensorDevice::Register(EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
+CHIP_ERROR IncreasingMoistureSoilSensorDevice::Register(EndpointId endpoint, CodeDrivenDataModelProvider & provider,
+                                                        EndpointId parentId)
 {
     ReturnErrorOnFailure(SoilSensorDevice::Register(endpoint, provider, parentId));
     // Kick off the timer loop to increase moisture every few seconds
@@ -65,7 +66,6 @@ void IncreasingMoistureSoilSensorDevice::Unregister(CodeDrivenDataModelProvider 
     mTimerDelegate.CancelTimer(this);
     SoilSensorDevice::Unregister(provider);
 }
-
 
 void IncreasingMoistureSoilSensorDevice::TimerFired()
 {

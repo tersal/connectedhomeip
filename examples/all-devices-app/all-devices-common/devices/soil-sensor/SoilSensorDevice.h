@@ -27,7 +27,8 @@ namespace app {
 class SoilSensorDevice : public SingleEndpointDevice
 {
 public:
-    SoilSensorDevice(TimerDelegate & timerDelegate, Clusters::SoilMeasurement::Attributes::SoilMoistureMeasurementLimits::TypeInfo::Type moistureLimits);
+    SoilSensorDevice(TimerDelegate & timerDelegate,
+                     Clusters::SoilMeasurement::Attributes::SoilMoistureMeasurementLimits::TypeInfo::Type moistureLimits);
     ~SoilSensorDevice() override = default;
 
     CHIP_ERROR Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider,
