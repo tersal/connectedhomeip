@@ -1,0 +1,90 @@
+/*
+ *
+ *    Copyright (c) 2025 Project CHIP Authors
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *        http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+#include "IncreasingMoistureSoilSensorDevice.h"
+#include <lib/support/CodeUtils.h>
+#include <lib/support/logging/CHIPLogging.h>
+#include <platform/CHIPDeviceLayer.h>
+
+using namespace chip::app::Clusters;
+using namespace chip::app::Clusters::SoilMeasurement;
+using namespace chip::app::Clusters::SoilMeasurement::Attributes;
+
+namespace chip {
+namespace app {
+
+namespace {
+constexpr System::Clock::Seconds16 kIncreaseMoistureIntervalSec = System::Clock::Seconds16(10);
+
+const Globals::Structs::MeasurementAccuracyRangeStruct::Type kDefaultSoilMoistureMeasurementLimitsAccuracyRange[] = {
+    { .rangeMin = 0, .rangeMax = 100, .percentMax = MakeOptional(static_cast<chip::Percent100ths>(10)) }
+};
+
+const SoilMoistureMeasurementLimits::TypeInfo::Type kDefaultSoilMoistureMeasurementLimits = {
+    .measurementType  = Globals::MeasurementTypeEnum::kSoilMoisture,
+    .measured         = true,
+    .minMeasuredValue = 0,
+    .maxMeasuredValue = 100,
+    .accuracyRanges   = DataModel::List<const Globals::Structs::MeasurementAccuracyRangeStruct::Type>(
+        kDefaultSoilMoistureMeasurementLimitsAccuracyRange)
+};
+
+} // namespace
+
+IncreasingMoistureSoilSensorDevice::IncreasingMoistureSoilSensorDevice() :
+    SoilSensorDevice(mTimerDelegate, kDefaultSoilMoistureMeasurementLimits)
+{}
+
+IncreasingMoistureSoilSensorDevice::~IncreasingMoistureSoilSensorDevice()
+{
+    mTimerDelegate.CancelTimer(this);
+}
+
+CHIP_ERROR IncreasingMoistureSoilSensorDevice::Register(EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
+{
+    ReturnErrorOnFailure(SoilSensorDevice::Register(endpoint, provider, parentId));
+    // Kick off the timer loop to flip occupancy every few seconds
+    return mTimerDelegate.StartTimer(this, kIncreaseMoistureIntervalSec);
+}
+
+void IncreasingMoistureSoilSensorDevice::Unregister(CodeDrivenDataModelProvider & provider)
+{
+    mTimerDelegate.CancelTimer(this);
+    SoilSensorDevice::Unregister(provider);
+}
+
+
+void IncreasingMoistureSoilSensorDevice::TimerFired()
+{
+    static SoilMeasurement::Attributes::SoilMoistureMeasuredValue::TypeInfo::Type soilMoistureMeasuredValue;
+
+    if(soilMoistureMeasuredValue.IsNull())
+    {
+        soilMoistureMeasuredValue.SetNonNull(1U);
+    }
+    else
+    {
+        soilMoistureMeasuredValue.SetNonNull(soilMoistureMeasuredValue.Value() + 1U);
+    }
+
+    ChipLogProgress(AppServer, "IncreasingMoistureValue: Increasing to %d", soilMoistureMeasuredValue.Value());
+    TEMPORARY_RETURN_IGNORED mSoilMeasurementCluster.Cluster().SetSoilMoistureMeasuredValue(soilMoistureMeasuredValue);
+
+    VerifyOrDie(mTimerDelegate.StartTimer(this, kIncreaseMoistureIntervalSec) == CHIP_NO_ERROR);
+}
+
+} // namespace app
+} // namespace chip
