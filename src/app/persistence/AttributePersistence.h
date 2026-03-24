@@ -78,8 +78,9 @@ public:
     ///   - apply optional custom validation
     ///   - write to storage
     template <typename T, typename Validator = decltype(nullptr), typename std::enable_if_t<std::is_arithmetic_v<T>> * = nullptr>
-    DataModel::ActionReturnStatus DecodeAndStoreNativeEndianValue(const ConcreteAttributePath & path, AttributeValueDecoder & decoder, T & value,
-                                               Validator validator = nullptr)
+    DataModel::ActionReturnStatus DecodeAndStoreNativeEndianValue(const ConcreteAttributePath & path,
+                                                                  AttributeValueDecoder & decoder, T & value,
+                                                                  Validator validator = nullptr)
     {
         T decodedValue{};
         ReturnErrorOnFailure(decoder.Decode(decodedValue));
@@ -121,8 +122,9 @@ public:
     // - applies optional custom validation
     // - writes to storage
     template <typename T, typename Validator = decltype(nullptr), typename std::enable_if_t<std::is_enum_v<T>> * = nullptr>
-    DataModel::ActionReturnStatus DecodeAndStoreNativeEndianValue(const ConcreteAttributePath & path, AttributeValueDecoder & decoder, T & value,
-                                               Validator validator = nullptr)
+    DataModel::ActionReturnStatus DecodeAndStoreNativeEndianValue(const ConcreteAttributePath & path,
+                                                                  AttributeValueDecoder & decoder, T & value,
+                                                                  Validator validator = nullptr)
     {
         T decodedValue = T::kUnknownEnumValue;
         ReturnErrorOnFailure(decoder.Decode(decodedValue));
