@@ -42,10 +42,16 @@ const SoilMoistureMeasurementLimits::TypeInfo::Type kDefaultSoilMoistureMeasurem
         kDefaultSoilMoistureMeasurementLimitsAccuracyRange)
 };
 
+const TemperatureMeasurementCluster::StartupConfiguration kDefaultTemperatureConfig = {
+    .minMeasuredValue = DataModel::MakeNullable(static_cast<int16_t>(-10)),
+    .maxMeasuredValue = DataModel::MakeNullable(static_cast<int16_t>(50)),
+    .tolerance        = 0,
+};
+
 } // namespace
 
 IncreasingMoistureSoilSensorDevice::IncreasingMoistureSoilSensorDevice() :
-    SoilSensorDevice(mTimerDelegate, kDefaultSoilMoistureMeasurementLimits)
+    SoilSensorDevice(mTimerDelegate, kDefaultSoilMoistureMeasurementLimits, kDefaultTemperatureConfig)
 {}
 
 IncreasingMoistureSoilSensorDevice::~IncreasingMoistureSoilSensorDevice()
@@ -84,6 +90,23 @@ void IncreasingMoistureSoilSensorDevice::TimerFired()
 
     ChipLogProgress(AppServer, "IncreasingMoistureValue: Increasing to %d", mSoilMoistureMeasuredValue.Value());
     LogErrorOnFailure(mSoilMeasurementCluster.Cluster().SetSoilMoistureMeasuredValue(mSoilMoistureMeasuredValue));
+
+    // Simulate increasing temperature
+    if (mTemperatureMeasuredValue.IsNull())
+    {
+        mTemperatureMeasuredValue.SetNonNull(kDefaultTemperatureConfig.minMeasuredValue.Value());
+    }
+    else if (mTemperatureMeasuredValue.Value() >= kDefaultTemperatureConfig.maxMeasuredValue.Value())
+    {
+        mTemperatureMeasuredValue.SetNonNull(kDefaultTemperatureConfig.minMeasuredValue.Value());
+    }
+    else
+    {
+        mTemperatureMeasuredValue.SetNonNull(static_cast<int16_t>(mTemperatureMeasuredValue.Value() + 1));
+    }
+
+    ChipLogProgress(AppServer, "IncreasingTemperatureValue: Increasing to %d", mTemperatureMeasuredValue.Value());
+    LogErrorOnFailure(mTemperatureMeasurementCluster.Cluster().SetMeasuredValue(mTemperatureMeasuredValue));
 
     VerifyOrDie(mTimerDelegate.StartTimer(this, kIncreaseMoistureIntervalSec) == CHIP_NO_ERROR);
 }

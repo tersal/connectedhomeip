@@ -127,7 +127,6 @@ private:
             return std::make_unique<LoggingSpeakerDevice>(
                 LoggingSpeakerDevice::Context{ .timerDelegate = mContext->timerDelegate });
         };
-        // TODO: Change this once the device is ready.
         mRegistry["soil-sensor"] = []() { return std::make_unique<IncreasingMoistureSoilSensorDevice>(); };
     }
 };

@@ -25,9 +25,10 @@ using namespace chip::app::Clusters::SoilMeasurement::Attributes;
 namespace chip {
 namespace app {
 
-SoilSensorDevice::SoilSensorDevice(TimerDelegate & timerDelegate, SoilMoistureMeasurementLimits::TypeInfo::Type moistureLimits) :
+SoilSensorDevice::SoilSensorDevice(TimerDelegate & timerDelegate, SoilMoistureMeasurementLimits::TypeInfo::Type moistureLimits,
+                                   TemperatureMeasurementCluster::StartupConfiguration tempConfig) :
     SingleEndpointDevice(Span<const DataModel::DeviceTypeEntry>(&Device::Type::kSoilSensor, 1)), mTimerDelegate(timerDelegate),
-    mMoistureLimits(moistureLimits)
+    mMoistureLimits(moistureLimits), mTempConfig(tempConfig)
 {}
 
 CHIP_ERROR SoilSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
@@ -37,6 +38,11 @@ CHIP_ERROR SoilSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataM
     // Create the identify cluster.
     mIdentifyCluster.Create(IdentifyCluster::Config(endpoint, mTimerDelegate));
     ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
+
+    // Create the temperature measurement cluster
+    TemperatureMeasurementCluster::OptionalAttributeSet optionalAttributeSet{0};
+    mTemperatureMeasurementCluster.Create(endpoint, optionalAttributeSet, mTempConfig);
+    ReturnErrorOnFailure(provider.AddCluster(mTemperatureMeasurementCluster.Registration()));
 
     // Create the soil measurement cluster.
     mSoilMeasurementCluster.Create(endpoint, mMoistureLimits);
@@ -48,6 +54,11 @@ CHIP_ERROR SoilSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataM
 void SoilSensorDevice::Unregister(CodeDrivenDataModelProvider & provider)
 {
     SingleEndpointUnregistration(provider);
+    if (mTemperatureMeasurementCluster.IsConstructed())
+    {
+        LogErrorOnFailure(provider.RemoveCluster(&mTemperatureMeasurementCluster.Cluster()));
+        mTemperatureMeasurementCluster.Destroy();
+    }
     if (mSoilMeasurementCluster.IsConstructed())
     {
         LogErrorOnFailure(provider.RemoveCluster(&mSoilMeasurementCluster.Cluster()));

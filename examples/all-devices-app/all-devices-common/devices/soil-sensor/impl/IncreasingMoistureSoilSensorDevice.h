@@ -44,6 +44,7 @@ public:
 private:
     DefaultTimerDelegate mTimerDelegate;
     Clusters::SoilMeasurement::Attributes::SoilMoistureMeasuredValue::TypeInfo::Type mSoilMoistureMeasuredValue;
+    DataModel::Nullable<int16_t> mTemperatureMeasuredValue;
 };
 
 } // namespace app
