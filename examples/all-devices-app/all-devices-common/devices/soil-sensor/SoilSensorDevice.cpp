@@ -27,8 +27,8 @@ namespace app {
 
 SoilSensorDevice::SoilSensorDevice(TimerDelegate & timerDelegate, SoilMoistureMeasurementLimits::TypeInfo::Type moistureLimits,
                                    TemperatureMeasurementCluster::StartupConfiguration tempConfig) :
-    SingleEndpointDevice(Span<const DataModel::DeviceTypeEntry>(&Device::Type::kSoilSensor, 1)), mTimerDelegate(timerDelegate),
-    mMoistureLimits(moistureLimits), mTempConfig(tempConfig)
+    SingleEndpointDevice(Span<const DataModel::DeviceTypeEntry>(&Device::Type::kSoilSensor, 1)),
+    mTimerDelegate(timerDelegate), mMoistureLimits(moistureLimits), mTempConfig(tempConfig)
 {}
 
 CHIP_ERROR SoilSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataModelProvider & provider, EndpointId parentId)
@@ -40,7 +40,7 @@ CHIP_ERROR SoilSensorDevice::Register(chip::EndpointId endpoint, CodeDrivenDataM
     ReturnErrorOnFailure(provider.AddCluster(mIdentifyCluster.Registration()));
 
     // Create the temperature measurement cluster
-    TemperatureMeasurementCluster::OptionalAttributeSet optionalAttributeSet{0};
+    TemperatureMeasurementCluster::OptionalAttributeSet optionalAttributeSet{ 0 };
     mTemperatureMeasurementCluster.Create(endpoint, optionalAttributeSet, mTempConfig);
     ReturnErrorOnFailure(provider.AddCluster(mTemperatureMeasurementCluster.Registration()));
 
