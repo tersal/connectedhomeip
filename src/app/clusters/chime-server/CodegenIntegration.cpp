@@ -41,7 +41,7 @@ ChimeServer::~ChimeServer()
 CHIP_ERROR ChimeServer::Init()
 {
     VerifyOrReturnError(mDelegate != nullptr, CHIP_ERROR_INCORRECT_STATE);
-    
+
     // Migrate attributes for this cluster from SafeAttribute to AttributePersistence
     SafeAttributePersistenceProvider * srcProvider = GetSafeAttributePersistenceProvider();
     AttributePersistenceProvider * dstProvider = GetAttributePersistenceProvider();
