@@ -92,9 +92,9 @@ void MatterBooleanStateConfigurationClusterInitCallback(EndpointId endpointId)
     // Migrate attributes for this cluster from SafeAttribute to AttributePersistence
 
     SafeAttributePersistenceProvider * srcProvider = GetSafeAttributePersistenceProvider();
-    AttributePersistenceProvider * dstProvider = GetAttributePersistenceProvider();
+    AttributePersistenceProvider * dstProvider     = GetAttributePersistenceProvider();
 
-    if( srcProvider != nullptr && dstProvider != nullptr)
+    if (srcProvider != nullptr && dstProvider != nullptr)
     {
         LogErrorOnFailure(MigrateBooleanStateConfigurationServerStorage(endpointId, *srcProvider, *dstProvider));
     }
