@@ -15,10 +15,10 @@
  *    limitations under the License.
  */
 #include <app-common/zap-generated/attributes/Accessors.h>
-#include <app/DefaultSafeAttributePersistenceProvider.h>
+#include <app/SafeAttributePersistenceProvider.h>
 #include <app/clusters/boolean-state-configuration-server/BooleanStateConfigurationCluster.h>
 #include <app/clusters/boolean-state-configuration-server/MigrateBooleanStateConfigurationServerStorage.h>
-#include <app/persistence/DefaultAttributePersistenceProvider.h>
+#include <app/persistence/AttributePersistenceProviderInstance.h>
 #include <app/server/Server.h>
 #include <app/static-cluster-config/BooleanStateConfiguration.h>
 #include <app/util/attribute-storage.h>
@@ -90,11 +90,14 @@ public:
 void MatterBooleanStateConfigurationClusterInitCallback(EndpointId endpointId)
 {
     // Migrate attributes for this cluster from SafeAttribute to AttributePersistence
-    DefaultSafeAttributePersistenceProvider safeProvider;
-    LogErrorOnFailure(safeProvider.Init(&Server::GetInstance().GetPersistentStorage()));
-    DefaultAttributePersistenceProvider dstProvider;
-    LogErrorOnFailure(dstProvider.Init(&Server::GetInstance().GetPersistentStorage()));
-    LogErrorOnFailure(MigrateBooleanStateConfigurationServerStorage(endpointId, safeProvider, dstProvider));
+
+    SafeAttributePersistenceProvider * srcProvider = GetSafeAttributePersistenceProvider();
+    AttributePersistenceProvider * dstProvider = GetAttributePersistenceProvider();
+
+    if( srcProvider != nullptr && dstProvider != nullptr)
+    {
+        LogErrorOnFailure(MigrateBooleanStateConfigurationServerStorage(endpointId, *srcProvider, *dstProvider));
+    }
 
     IntegrationDelegate integrationDelegate;
 
