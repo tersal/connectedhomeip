@@ -16,11 +16,10 @@
  */
 
 #include "CodegenIntegration.h"
-#include <app/DefaultSafeAttributePersistenceProvider.h>
+#include <app/SafeAttributePersistenceProvider.h>
 #include <app/clusters/chime-server/ChimeCluster.h>
 #include <app/clusters/chime-server/MigrateChimeServerStorage.h>
-#include <app/persistence/DefaultAttributePersistenceProvider.h>
-#include <app/server/Server.h>
+#include <app/persistence/AttributePersistenceProviderInstance.h>
 #include <data-model-providers/codegen/CodegenDataModelProvider.h>
 #include <lib/support/CodeUtils.h>
 
@@ -42,12 +41,15 @@ ChimeServer::~ChimeServer()
 CHIP_ERROR ChimeServer::Init()
 {
     VerifyOrReturnError(mDelegate != nullptr, CHIP_ERROR_INCORRECT_STATE);
+    
     // Migrate attributes for this cluster from SafeAttribute to AttributePersistence
-    DefaultSafeAttributePersistenceProvider safeProvider;
-    LogErrorOnFailure(safeProvider.Init(&Server::GetInstance().GetPersistentStorage()));
-    DefaultAttributePersistenceProvider dstProvider;
-    LogErrorOnFailure(dstProvider.Init(&Server::GetInstance().GetPersistentStorage()));
-    LogErrorOnFailure(Chime::MigrateChimeServerStorage(mEndpointId, safeProvider, dstProvider));
+    SafeAttributePersistenceProvider * srcProvider = GetSafeAttributePersistenceProvider();
+    AttributePersistenceProvider * dstProvider = GetAttributePersistenceProvider();
+
+    if( srcProvider != nullptr && dstProvider != nullptr)
+    {
+        LogErrorOnFailure(Chime::MigrateChimeServerStorage(mEndpointId, *srcProvider, *dstProvider));
+    }
 
     mCluster.Create(mEndpointId, *mDelegate);
     return CodegenDataModelProvider::Instance().Registry().Register(mCluster.Registration());
