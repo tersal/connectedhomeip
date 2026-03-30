@@ -28,6 +28,21 @@ using namespace chip::app;
 using namespace chip::app::Clusters;
 using chip::app::Clusters::ChimeServer;
 
+CHIP_ERROR CodegenChimeCluster::Startup(ServerClusterContext & context)
+{
+    // Migrate attributes for this cluster from SafeAttribute to AttributePersistence.
+    // This is done at Startup time when the persistence providers are guaranteed to be available.
+    SafeAttributePersistenceProvider * srcProvider = GetSafeAttributePersistenceProvider();
+    AttributePersistenceProvider * dstProvider     = GetAttributePersistenceProvider();
+
+    if (srcProvider != nullptr && dstProvider != nullptr)
+    {
+        LogErrorOnFailure(Chime::MigrateChimeServerStorage(mPath.mEndpointId, *srcProvider, *dstProvider));
+    }
+
+    return ChimeCluster::Startup(context);
+}
+
 ChimeServer::ChimeServer(EndpointId endpointId, ChimeDelegate & delegate) : mEndpointId(endpointId), mDelegate(&delegate) {}
 
 ChimeServer::~ChimeServer()
@@ -41,15 +56,6 @@ ChimeServer::~ChimeServer()
 CHIP_ERROR ChimeServer::Init()
 {
     VerifyOrReturnError(mDelegate != nullptr, CHIP_ERROR_INCORRECT_STATE);
-
-    // Migrate attributes for this cluster from SafeAttribute to AttributePersistence
-    SafeAttributePersistenceProvider * srcProvider = GetSafeAttributePersistenceProvider();
-    AttributePersistenceProvider * dstProvider     = GetAttributePersistenceProvider();
-
-    if (srcProvider != nullptr && dstProvider != nullptr)
-    {
-        LogErrorOnFailure(Chime::MigrateChimeServerStorage(mEndpointId, *srcProvider, *dstProvider));
-    }
 
     mCluster.Create(mEndpointId, *mDelegate);
     return CodegenDataModelProvider::Instance().Registry().Register(mCluster.Registration());
