@@ -29,8 +29,8 @@ CHIP_ERROR MigrateChimeServerStorage(EndpointId endpointId, SafeAttributePersist
                                      AttributePersistenceProvider & dstProvider)
 {
     static constexpr AttrMigrationData attributesToUpdate[] = {
-        { Attributes::SelectedChime::Id, &DefaultMigrators::ScalarValue<uint8_t> },
-        { Attributes::Enabled::Id, &DefaultMigrators::ScalarValue<bool> },
+        { Attributes::SelectedChime::Id, sizeof(uint8_t), true },
+        { Attributes::Enabled::Id, sizeof(bool), true },
     };
     // We need to provide a buffer with enough space for the attributes that will be migrated.
     // Both uint8_t and bool fit in 1 byte.

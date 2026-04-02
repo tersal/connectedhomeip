@@ -28,7 +28,7 @@ CHIP_ERROR MigrateUnitLocalizationServerStorage(EndpointId endpointId, SafeAttri
                                                 AttributePersistenceProvider & dstProvider)
 {
     static constexpr AttrMigrationData attributesToUpdate[] = { { Attributes::TemperatureUnit::Id,
-                                                                  &DefaultMigrators::ScalarValue<uint8_t> } };
+                                                                  sizeof(uint8_t), true } };
     // We need to provide a buffer with enough space for the attributes that will be migrated.
     uint8_t attributeBuffer[sizeof(uint8_t)] = {};
     MutableByteSpan buffer(attributeBuffer);
