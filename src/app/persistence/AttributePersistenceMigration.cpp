@@ -20,7 +20,7 @@
 
 namespace {
 
-using namespace::chip;
+using namespace ::chip;
 using namespace chip::app;
 
 /**
@@ -61,7 +61,7 @@ CHIP_ERROR HostSwapBySize(uint8_t * data, size_t size)
 }
 
 CHIP_ERROR MigrateValueFromSafe(const ConcreteAttributePath & attrPath, SafeAttributePersistenceProvider & provider,
-                       MutableByteSpan & buffer, size_t valueSize, bool isScalar)
+                                MutableByteSpan & buffer, size_t valueSize, bool isScalar)
 {
     // For non-scalar values, just return the raw data.
     if (!isScalar)
@@ -112,7 +112,8 @@ CHIP_ERROR MigrateFromSafeToAttributePersistenceProvider(SafeAttributePersistenc
         MutableByteSpan copyOfBuffer = buffer;
         // If there was an error reading from SafeAttributePersistence, then we shouldn't try to write that value
         // to AttributePersistence
-        ChipError attributeMigrationError = MigrateValueFromSafe(attrPath, safeProvider, copyOfBuffer, entry.valueSize, entry.isScalar);
+        ChipError attributeMigrationError =
+            MigrateValueFromSafe(attrPath, safeProvider, copyOfBuffer, entry.valueSize, entry.isScalar);
         if (attributeMigrationError != CHIP_NO_ERROR)
         {
             // If the value was not found in SafeAttributePersistence, it means that it was already migrated or that
