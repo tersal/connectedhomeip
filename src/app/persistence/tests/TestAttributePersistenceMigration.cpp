@@ -352,7 +352,7 @@ TEST(TestAttributePersistenceMigration, TestMigrationWithSafeValueMigrator)
     const uint8_t kRawValue[] = { 0xDE, 0xAD, 0xBE, 0xEF };
     ASSERT_EQ(safeRamProvider.SafeWriteValue(path, ByteSpan(kRawValue)), CHIP_NO_ERROR);
 
-    // Migrate using non-scalar migrator (raw bytes)
+    // Migrate raw bytes using AttrMigrationData { valueSize, isScalar }.
     const AttrMigrationData attributesToMigrate[] = {
         { 3, sizeof(kRawValue), false },
     };

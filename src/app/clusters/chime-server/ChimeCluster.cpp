@@ -214,7 +214,7 @@ DataModel::ActionReturnStatus ChimeCluster::WriteAttribute(const DataModel::Writ
 
 Status ChimeCluster::SetSelectedChime(uint8_t chimeID)
 {
-    VerifyOrReturnError(mContext != nullptr, Status::InvalidInState);
+    VerifyOrReturnValue(mContext != nullptr, Status::InvalidInState);
     VerifyOrReturnValue(IsSupportedChimeID(chimeID), Status::NotFound);
     VerifyOrReturnValue(SetAttributeValue(mSelectedChime, chimeID, Attributes::SelectedChime::Id), Status::Success);
 
@@ -227,7 +227,7 @@ Status ChimeCluster::SetSelectedChime(uint8_t chimeID)
 
 Status ChimeCluster::SetEnabled(bool enabled)
 {
-    VerifyOrReturnError(mContext != nullptr, Status::InvalidInState);
+    VerifyOrReturnValue(mContext != nullptr, Status::InvalidInState);
     VerifyOrReturnValue(SetAttributeValue(mEnabled, enabled, Attributes::Enabled::Id), Status::Success);
 
     TEMPORARY_RETURN_IGNORED mContext->attributeStorage.WriteValue(

@@ -19,6 +19,8 @@
 #include <lib/support/logging/CHIPLogging.h>
 #include <nlbyteorder.h>
 
+#include <cstring>
+
 namespace {
 
 using namespace ::chip;
@@ -35,6 +37,7 @@ CHIP_ERROR HostSwapBySize(uint8_t * data, size_t size)
     {
 #if (NLBYTEORDER == NLBYTEORDER_BIG_ENDIAN)
     case 1:
+        // Single byte, no swap needed.
         return CHIP_NO_ERROR;
     case 2: {
         uint16_t val;
