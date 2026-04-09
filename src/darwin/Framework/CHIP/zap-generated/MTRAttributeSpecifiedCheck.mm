@@ -441,6 +441,9 @@ static BOOL AttributeIsSpecifiedInBasicInformationCluster(AttributeId aAttribute
     case Attributes::MaxPathsPerInvoke::Id: {
         return YES;
     }
+    case Attributes::DeviceLocation::Id: {
+        return YES;
+    }
     case Attributes::ConfigurationVersion::Id: {
         return YES;
     }
@@ -4226,6 +4229,64 @@ static BOOL AttributeIsSpecifiedInThermostatUserInterfaceConfigurationCluster(At
     }
     }
 }
+static BOOL AttributeIsSpecifiedInHumidistatCluster(AttributeId aAttributeId)
+{
+    using namespace Clusters::Humidistat;
+    switch (aAttributeId) {
+    case Attributes::Mode::Id: {
+        return YES;
+    }
+    case Attributes::SystemState::Id: {
+        return YES;
+    }
+    case Attributes::UserSetpoint::Id: {
+        return YES;
+    }
+    case Attributes::MinSetpoint::Id: {
+        return YES;
+    }
+    case Attributes::MaxSetpoint::Id: {
+        return YES;
+    }
+    case Attributes::Step::Id: {
+        return YES;
+    }
+    case Attributes::TargetSetpoint::Id: {
+        return YES;
+    }
+    case Attributes::MistType::Id: {
+        return YES;
+    }
+    case Attributes::Continuous::Id: {
+        return YES;
+    }
+    case Attributes::Sleep::Id: {
+        return YES;
+    }
+    case Attributes::Optimal::Id: {
+        return YES;
+    }
+    case Attributes::GeneratedCommandList::Id: {
+        return YES;
+    }
+    case Attributes::AcceptedCommandList::Id: {
+        return YES;
+    }
+    case Attributes::AttributeList::Id: {
+        return YES;
+    }
+    case Attributes::FeatureMap::Id: {
+        return YES;
+    }
+    case Attributes::ClusterRevision::Id: {
+        return YES;
+    }
+    default: {
+        // Not a known Humidistat attribute.
+        return NO;
+    }
+    }
+}
 static BOOL AttributeIsSpecifiedInColorControlCluster(AttributeId aAttributeId)
 {
     using namespace Clusters::ColorControl;
@@ -7341,6 +7402,9 @@ BOOL MTRAttributeIsSpecified(ClusterId aClusterId, AttributeId aAttributeId)
     }
     case Clusters::ThermostatUserInterfaceConfiguration::Id: {
         return AttributeIsSpecifiedInThermostatUserInterfaceConfigurationCluster(aAttributeId);
+    }
+    case Clusters::Humidistat::Id: {
+        return AttributeIsSpecifiedInHumidistatCluster(aAttributeId);
     }
     case Clusters::ColorControl::Id: {
         return AttributeIsSpecifiedInColorControlCluster(aAttributeId);

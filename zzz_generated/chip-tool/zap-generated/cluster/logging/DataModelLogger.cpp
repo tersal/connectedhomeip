@@ -11565,10 +11565,18 @@ CHIP_ERROR DataModelLogger::LogValue(const char * label, size_t indent,
 {
     DataModelLogger::LogString(label, indent, "{");
     {
-        CHIP_ERROR err = DataModelLogger::LogValue("AmbientContextType", indent + 1, value.ambientContextType);
+        CHIP_ERROR err = DataModelLogger::LogValue("AmbientContextDetected", indent + 1, value.ambientContextDetected);
         if (err != CHIP_NO_ERROR)
         {
-            DataModelLogger::LogString(indent + 1, "Event truncated due to invalid value for 'AmbientContextType'");
+            DataModelLogger::LogString(indent + 1, "Event truncated due to invalid value for 'AmbientContextDetected'");
+            return err;
+        }
+    }
+    {
+        CHIP_ERROR err = DataModelLogger::LogValue("ObjectCountReached", indent + 1, value.objectCountReached);
+        if (err != CHIP_NO_ERROR)
+        {
+            DataModelLogger::LogString(indent + 1, "Event truncated due to invalid value for 'ObjectCountReached'");
             return err;
         }
     }
@@ -11589,10 +11597,10 @@ CHIP_ERROR DataModelLogger::LogValue(const char * label, size_t indent,
 {
     DataModelLogger::LogString(label, indent, "{");
     {
-        CHIP_ERROR err = DataModelLogger::LogValue("StartEventNumber", indent + 1, value.startEventNumber);
+        CHIP_ERROR err = DataModelLogger::LogValue("EventStartTime", indent + 1, value.eventStartTime);
         if (err != CHIP_NO_ERROR)
         {
-            DataModelLogger::LogString(indent + 1, "Event truncated due to invalid value for 'StartEventNumber'");
+            DataModelLogger::LogString(indent + 1, "Event truncated due to invalid value for 'EventStartTime'");
             return err;
         }
     }
@@ -13756,6 +13764,11 @@ CHIP_ERROR DataModelLogger::LogAttribute(const chip::app::ConcreteDataAttributeP
             uint16_t value;
             ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
             return DataModelLogger::LogValue("MaxPathsPerInvoke", 1, value);
+        }
+        case BasicInformation::Attributes::DeviceLocation::Id: {
+            chip::app::DataModel::Nullable<chip::app::Clusters::Globals::Structs::LocationDescriptorStruct::DecodableType> value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("DeviceLocation", 1, value);
         }
         case BasicInformation::Attributes::ConfigurationVersion::Id: {
             uint32_t value;
@@ -19442,6 +19455,92 @@ CHIP_ERROR DataModelLogger::LogAttribute(const chip::app::ConcreteDataAttributeP
             return DataModelLogger::LogValue("FeatureMap", 1, value);
         }
         case ThermostatUserInterfaceConfiguration::Attributes::ClusterRevision::Id: {
+            uint16_t value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("ClusterRevision", 1, value);
+        }
+        }
+        break;
+    }
+    case Humidistat::Id: {
+        switch (path.mAttributeId)
+        {
+        case Humidistat::Attributes::Mode::Id: {
+            chip::app::Clusters::Humidistat::ModeEnum value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("Mode", 1, value);
+        }
+        case Humidistat::Attributes::SystemState::Id: {
+            chip::app::Clusters::Humidistat::SystemStateEnum value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("SystemState", 1, value);
+        }
+        case Humidistat::Attributes::UserSetpoint::Id: {
+            chip::Percent value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("UserSetpoint", 1, value);
+        }
+        case Humidistat::Attributes::MinSetpoint::Id: {
+            chip::Percent value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("MinSetpoint", 1, value);
+        }
+        case Humidistat::Attributes::MaxSetpoint::Id: {
+            chip::Percent value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("MaxSetpoint", 1, value);
+        }
+        case Humidistat::Attributes::Step::Id: {
+            chip::Percent value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("Step", 1, value);
+        }
+        case Humidistat::Attributes::TargetSetpoint::Id: {
+            chip::Percent value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("TargetSetpoint", 1, value);
+        }
+        case Humidistat::Attributes::MistType::Id: {
+            chip::BitMask<chip::app::Clusters::Humidistat::MistTypeBitmap> value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("MistType", 1, value);
+        }
+        case Humidistat::Attributes::Continuous::Id: {
+            bool value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("Continuous", 1, value);
+        }
+        case Humidistat::Attributes::Sleep::Id: {
+            bool value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("Sleep", 1, value);
+        }
+        case Humidistat::Attributes::Optimal::Id: {
+            bool value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("Optimal", 1, value);
+        }
+        case Humidistat::Attributes::GeneratedCommandList::Id: {
+            chip::app::DataModel::DecodableList<chip::CommandId> value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogGeneratedCommandId("GeneratedCommandList", 1, value, Humidistat::Id);
+        }
+        case Humidistat::Attributes::AcceptedCommandList::Id: {
+            chip::app::DataModel::DecodableList<chip::CommandId> value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogAcceptedCommandId("AcceptedCommandList", 1, value, Humidistat::Id);
+        }
+        case Humidistat::Attributes::AttributeList::Id: {
+            chip::app::DataModel::DecodableList<chip::AttributeId> value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogAttributeId("AttributeList", 1, value, Humidistat::Id);
+        }
+        case Humidistat::Attributes::FeatureMap::Id: {
+            uint32_t value;
+            ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
+            return DataModelLogger::LogValue("FeatureMap", 1, value);
+        }
+        case Humidistat::Attributes::ClusterRevision::Id: {
             uint16_t value;
             ReturnErrorOnFailure(chip::app::DataModel::Decode(*data, value));
             return DataModelLogger::LogValue("ClusterRevision", 1, value);
