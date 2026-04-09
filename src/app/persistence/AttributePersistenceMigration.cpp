@@ -17,6 +17,7 @@
 #include <app/persistence/AttributePersistenceMigration.h>
 #include <lib/core/CHIPEncoding.h>
 #include <lib/support/logging/CHIPLogging.h>
+#include <nlbyteorder.h>
 
 namespace {
 
@@ -24,15 +25,16 @@ using namespace ::chip;
 using namespace chip::app;
 
 /**
- * Performs an in-place little-endian to host byte-order swap on a buffer of the given size.
- * Uses non-template HostSwap functions to avoid template bloat.
+ * Validates that the given size is a supported scalar width (1, 2, 4, or 8 bytes).
+ * On big-endian systems, also performs an in-place little-endian to host byte-order swap.
+ * On little-endian systems, no swap is needed so only the size validation is performed.
  */
 CHIP_ERROR HostSwapBySize(uint8_t * data, size_t size)
 {
     switch (size)
     {
+#if (NLBYTEORDER == NLBYTEORDER_BIG_ENDIAN)
     case 1:
-        // Single byte, no swap needed.
         return CHIP_NO_ERROR;
     case 2: {
         uint16_t val;
@@ -55,6 +57,13 @@ CHIP_ERROR HostSwapBySize(uint8_t * data, size_t size)
         memcpy(data, &val, sizeof(val));
         return CHIP_NO_ERROR;
     }
+#else
+    case 1:
+    case 2:
+    case 4:
+    case 8:
+        return CHIP_NO_ERROR;
+#endif
     default:
         return CHIP_ERROR_INVALID_ARGUMENT;
     }
@@ -63,14 +72,28 @@ CHIP_ERROR HostSwapBySize(uint8_t * data, size_t size)
 CHIP_ERROR MigrateValueFromSafe(const ConcreteAttributePath & attrPath, SafeAttributePersistenceProvider & provider,
                                 MutableByteSpan & buffer, size_t valueSize, bool isScalar)
 {
+
+    VerifyOrReturnError(valueSize <= buffer.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
+
+#if (NLBYTEORDER == NLBYTEORDER_LITTLE_ENDIAN)
+    // On little-endian systems, no byte swap is needed for scalar values.
+    // Read directly into the output buffer and validate the size.
+    if (isScalar)
+    {
+        ReturnErrorOnFailure(HostSwapBySize(buffer.data(), valueSize));
+    }
+    ReturnErrorOnFailure(provider.SafeReadValue(attrPath, buffer));
+    VerifyOrReturnError(buffer.size() == valueSize, CHIP_ERROR_INCORRECT_STATE);
+#else
+
+    // On big-endian, no need to swap non-scalar values.
     // For non-scalar values, just return the raw data.
     if (!isScalar)
     {
         return provider.SafeReadValue(attrPath, buffer);
     }
 
-    // For scalar values, we will need to perform endianness handling.
-    VerifyOrReturnError(valueSize <= buffer.size(), CHIP_ERROR_BUFFER_TOO_SMALL);
+    // For scalar values, read into a temp buffer, byte-swap, then copy out.
     uint8_t attrData[sizeof(uint64_t)];
     MutableByteSpan tempVal(attrData);
 
@@ -79,6 +102,7 @@ CHIP_ERROR MigrateValueFromSafe(const ConcreteAttributePath & attrPath, SafeAttr
     ReturnErrorOnFailure(HostSwapBySize(tempVal.data(), valueSize));
     memcpy(buffer.data(), tempVal.data(), valueSize);
     buffer.reduce_size(valueSize);
+#endif
     return CHIP_NO_ERROR;
 }
 } // namespace
