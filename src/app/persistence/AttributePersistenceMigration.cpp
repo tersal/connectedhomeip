@@ -81,12 +81,13 @@ CHIP_ERROR MigrateValueFromSafe(const ConcreteAttributePath & attrPath, SafeAttr
 #if (NLBYTEORDER == NLBYTEORDER_LITTLE_ENDIAN)
     // On little-endian systems, no byte swap is needed for scalar values.
     // Read directly into the output buffer and validate the size.
+    ReturnErrorOnFailure(provider.SafeReadValue(attrPath, buffer));
+    VerifyOrReturnError(buffer.size() == valueSize, CHIP_ERROR_INCORRECT_STATE);
+    // For scalar values in LE the function HostSwapBySize just checks that a valid size was provided.
     if (isScalar)
     {
         ReturnErrorOnFailure(HostSwapBySize(buffer.data(), valueSize));
     }
-    ReturnErrorOnFailure(provider.SafeReadValue(attrPath, buffer));
-    VerifyOrReturnError(buffer.size() == valueSize, CHIP_ERROR_INCORRECT_STATE);
 #else
 
     // On big-endian, no need to swap non-scalar values.
