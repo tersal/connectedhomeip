@@ -187,7 +187,8 @@ jobs:
                   libcs.
               # This step is currently disabled due CI erros that stopped the linter from working, allowing error to sneak in
               # should be enabled after https://github.com/project-chip/connectedhomeip/issues/71536 is addressed.
-              if: false
+              if: always()
+              continue-on-error: true
               run: |
                   git grep -I -n "PRI.16" -- './*' ':(exclude).github/workflows/lint.yml' ':(exclude)third_party/lwip/repo/lwip/src/include/lwip/arch.h' && exit 1 || exit 0
 
@@ -199,7 +200,8 @@ jobs:
                   libcs.
               # This step is currently disabled due CI erros that stopped the linter from working, allowing error to sneak in
               # should be enabled after https://github.com/project-chip/connectedhomeip/issues/71537 is addressed.
-              if: false
+              if: always()
+              continue-on-error: true
               run: |
                   # TODO: MessageDefHelper should ideally not be excluded here.
                   # TODO: chip_im_initiatore should ideally not be excluded here.
@@ -214,7 +216,8 @@ jobs:
             - name: Check for use of %zu, which are not supported on some libcs.
               # This step is currently disabled due CI erros that stopped the linter from working, allowing error to sneak in
               # should be enabled after https://github.com/project-chip/connectedhomeip/issues/71538 is addressed.
-              if: false
+              if: always()
+              continue-on-error: true
               run: |
                   git grep -I -n "%zu" -- './*' ':(exclude).github/workflows/lint.yml' && exit 1 || exit 0
 
@@ -245,7 +248,8 @@ jobs:
             - name: Check for disallowed include files
               # This step is currently disabled due CI erros that stopped the linter from working, allowing error to sneak in
               # should be enabled after https://github.com/project-chip/connectedhomeip/issues/71539 is addressed.
-              if: false
+              if: always()
+              continue-on-error: true
               run: scripts/tools/check_includes.sh
 
             - name: Check for zcl.json and extension sync status
@@ -313,7 +317,7 @@ jobs:
                   'AttributePersistenceProvider' symbols
               # This step is currently disabled due CI erros that stopped the linter from working, allowing error to sneak in
               # should be enabled after https://github.com/project-chip/connectedhomeip/issues/71540 is addressed.
-              if: false
+              if: always()
               run: |
                   scripts/find_attribute_persistence_provider_usage.sh \
                   --skip-subtree .github/ \
@@ -395,7 +399,8 @@ jobs:
                   probably be "SuccessOrExit(err = something("
               # This step is currently disabled due CI erros that stopped the linter from working, allowing error to sneak in
               # should be enabled after https://github.com/project-chip/connectedhomeip/issues/71541 is addressed.
-              if: false
+              if: always()
+              continue-on-error: true
               run: |
                   git grep -I -n 'SuccessOrExit([^=)]*(' -- './*' ':(exclude).github/workflows/lint.yml' && exit 1 || exit 0
 
