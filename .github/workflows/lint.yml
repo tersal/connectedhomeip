@@ -382,9 +382,7 @@ jobs:
             - name:
                   Check for use of "SuccessOrExit(CHIP_ERROR_*)", which should
                   probably be "SuccessOrExit(err = CHIP_ERROR_*)"
-              # This step is currently disabled due CI erros that stopped the linter from working, allowing error to sneak in
-              # should be enabled after https://github.com/project-chip/connectedhomeip/issues/71541 is addressed.
-              if: false
+              if: always()
               run: |
                   git grep -I -n 'SuccessOrExit(CHIP_ERROR' -- './*' ':(exclude).github/workflows/lint.yml' && exit 1 || exit 0
 
@@ -395,7 +393,9 @@ jobs:
                   Check for use of
                   "SuccessOrExit(something-without-assignment(", which should
                   probably be "SuccessOrExit(err = something("
-              if: always()
+              # This step is currently disabled due CI erros that stopped the linter from working, allowing error to sneak in
+              # should be enabled after https://github.com/project-chip/connectedhomeip/issues/71541 is addressed.
+              if: false
               run: |
                   git grep -I -n 'SuccessOrExit([^=)]*(' -- './*' ':(exclude).github/workflows/lint.yml' && exit 1 || exit 0
 
