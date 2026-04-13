@@ -318,6 +318,7 @@ jobs:
               # This step is currently disabled due CI erros that stopped the linter from working, allowing error to sneak in
               # should be enabled after https://github.com/project-chip/connectedhomeip/issues/71540 is addressed.
               if: always()
+              continue-on-error: true
               run: |
                   scripts/find_attribute_persistence_provider_usage.sh \
                   --skip-subtree .github/ \
