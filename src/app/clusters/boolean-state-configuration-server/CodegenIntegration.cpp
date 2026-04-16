@@ -46,7 +46,7 @@ public:
     CHIP_ERROR Startup(chip::app::ServerClusterContext & context) override
     {
         chip::app::SafeAttributePersistenceProvider * srcProvider = chip::app::GetSafeAttributePersistenceProvider();
-        chip::app::AttributePersistenceProvider & dstProvider      = context.attributeStorage;
+        chip::app::AttributePersistenceProvider & dstProvider     = context.attributeStorage;
 
         if (srcProvider != nullptr)
         {
