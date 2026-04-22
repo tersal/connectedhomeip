@@ -34,7 +34,7 @@ CHIP_ERROR MigrateResourceMonitoringServerStorage(EndpointId endpointId, Cluster
                   ActivatedCarbonFilterMonitoring::Attributes::LastChangedTime::Id);
 
     static constexpr AttrMigrationData attributesToUpdate[] = {
-        { HepaFilterMonitoring::Attributes::LastChangedTime::Id, sizeof(DataModel::Nullable<uint32_t>), true /* isScalar */ },
+        { HepaFilterMonitoring::Attributes::LastChangedTime::Id, sizeof(uint32_t), true /* isScalar */ },
     };
 
     // We need to provide a buffer with enough space for the attributes that will be migrated.
