@@ -16,7 +16,5 @@ app_config_dependent_sources = [
   "CodegenIntegration.h",
   "CodegenResourceMonitoringCluster.cpp",
   "CodegenResourceMonitoringCluster.h",
-  "MigrateResourceMonitoringServerStorage.cpp",
-  "MigrateResourceMonitoringServerStorage.h",
   "resource-monitoring-server.h",
 ]
