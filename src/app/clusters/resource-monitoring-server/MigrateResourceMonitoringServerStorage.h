@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include <app/persistence/AttributePersistenceMigration.h>
 #include <lib/core/DataModelTypes.h>
 
 namespace chip {
