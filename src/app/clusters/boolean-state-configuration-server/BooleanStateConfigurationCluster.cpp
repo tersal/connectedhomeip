@@ -319,6 +319,7 @@ void BooleanStateConfigurationCluster::GenerateSensorFault(SensorFaultBitMask fa
 
 CHIP_ERROR BooleanStateConfigurationCluster::SetCurrentSensitivityLevel(uint8_t level)
 {
+    VerifyOrReturnError(mContext != nullptr, CHIP_ERROR_INCORRECT_STATE);
     VerifyOrReturnError(level < mSupportedSensitivityLevels, CHIP_IM_GLOBAL_STATUS(ConstraintError));
     VerifyOrReturnError(mCurrentSensitivityLevel != level, CHIP_NO_ERROR);
 
