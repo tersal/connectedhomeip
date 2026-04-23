@@ -66,7 +66,7 @@ DataModel::ActionReturnStatus ResourceMonitoringCluster::WriteImpl(const DataMod
     switch (request.path.mAttributeId)
     {
     case ResourceMonitoring::Attributes::LastChangedTime::Id: {
-        
+
         VerifyOrReturnError(mContext != nullptr, Status::InvalidInState);
         AttributePersistence attrPersistence{ mContext->attributeStorage };
         return attrPersistence.DecodeAndStoreNativeEndianValue(request.path, decoder, mLastChangedTime);
