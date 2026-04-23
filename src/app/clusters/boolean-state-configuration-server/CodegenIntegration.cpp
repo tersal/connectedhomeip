@@ -18,7 +18,6 @@
 #include <app/SafeAttributePersistenceProvider.h>
 #include <app/clusters/boolean-state-configuration-server/BooleanStateConfigurationCluster.h>
 #include <app/clusters/boolean-state-configuration-server/MigrateBooleanStateConfigurationStorage.h>
-#include <app/persistence/AttributePersistenceProviderInstance.h>
 #include <app/static-cluster-config/BooleanStateConfiguration.h>
 #include <app/util/attribute-storage.h>
 #include <app/util/endpoint-config-api.h>

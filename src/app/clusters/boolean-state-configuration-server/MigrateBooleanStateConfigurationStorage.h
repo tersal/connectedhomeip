@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include <app/clusters/boolean-state-configuration-server/BooleanStateConfigurationCluster.h>
+#include <app/util/basic-types.h>
 #include <app/persistence/AttributePersistenceMigration.h>
 
 namespace chip {
