@@ -70,7 +70,6 @@ DataModel::ActionReturnStatus ResourceMonitoringCluster::WriteImpl(const DataMod
         VerifyOrReturnError(mContext != nullptr, Status::InvalidInState);
         AttributePersistence attrPersistence{ mContext->attributeStorage };
         return attrPersistence.DecodeAndStoreNativeEndianValue(request.path, decoder, mLastChangedTime);
-
     }
 
     default:
@@ -227,9 +226,10 @@ ResourceMonitoringCluster::UpdateLastChangedTime(DataModel::Nullable<uint32_t> a
     NumericAttributeTraits<uint32_t>::StorageType storageValue;
     DataModel::NullableToStorage(mLastChangedTime, storageValue);
 
-    ReturnValueOnFailure(mContext->attributeStorage.WriteValue(
-        ConcreteAttributePath(mPath.mEndpointId, mPath.mClusterId, kAttributeId),
-        { reinterpret_cast<const uint8_t *>(&storageValue), sizeof(storageValue) }), Status::Failure);
+    ReturnValueOnFailure(
+        mContext->attributeStorage.WriteValue(ConcreteAttributePath(mPath.mEndpointId, mPath.mClusterId, kAttributeId),
+                                              { reinterpret_cast<const uint8_t *>(&storageValue), sizeof(storageValue) }),
+        Status::Failure);
     NotifyAttributeChanged(kAttributeId);
 
     return Protocols::InteractionModel::Status::Success;

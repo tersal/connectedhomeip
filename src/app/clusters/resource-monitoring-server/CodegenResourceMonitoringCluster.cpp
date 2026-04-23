@@ -15,8 +15,8 @@
  *    limitations under the License.
  */
 
-#include <app/clusters/resource-monitoring-server/CodegenResourceMonitoringCluster.h>
 #include <app/SafeAttributePersistenceProvider.h>
+#include <app/clusters/resource-monitoring-server/CodegenResourceMonitoringCluster.h>
 #include <app/clusters/resource-monitoring-server/MigrateResourceMonitoringServerStorage.h>
 #include <lib/support/CodeUtils.h>
 
@@ -38,8 +38,8 @@ CHIP_ERROR CodegenResourceMonitoringCluster::Startup(ServerClusterContext & cont
 
     if (srcProvider != nullptr)
     {
-        LogErrorOnFailure(
-            ResourceMonitoring::MigrateResourceMonitoringServerStorage(mPath.mEndpointId, mPath.mClusterId, *srcProvider, dstProvider));
+        LogErrorOnFailure(ResourceMonitoring::MigrateResourceMonitoringServerStorage(mPath.mEndpointId, mPath.mClusterId,
+                                                                                     *srcProvider, dstProvider));
     }
 
     return ResourceMonitoringCluster::Startup(context);
