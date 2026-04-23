@@ -21,8 +21,6 @@ TARGET_SOURCES(
     "${CLUSTER_DIR}/CodegenIntegration.cpp"
     "${CLUSTER_DIR}/CodegenResourceMonitoringCluster.cpp"
     "${CLUSTER_DIR}/CodegenResourceMonitoringCluster.h"
-    "${CLUSTER_DIR}/MigrateResourceMonitoringServerStorage.cpp"
-    "${CLUSTER_DIR}/MigrateResourceMonitoringServerStorage.h"
     "${CLUSTER_DIR}/resource-monitoring-server.h"
 )
 
