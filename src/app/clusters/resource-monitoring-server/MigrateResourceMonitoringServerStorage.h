@@ -24,9 +24,6 @@
 namespace chip {
 namespace app {
 
-class SafeAttributePersistenceProvider;
-class AttributePersistenceProvider;
-
 namespace Clusters {
 namespace ResourceMonitoring {
 
