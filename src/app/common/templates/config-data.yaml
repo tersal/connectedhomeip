@@ -34,7 +34,6 @@ CommandHandlerInterfaceOnlyClusters:
     - Laundry Washer Mode
     - Microwave Oven Control
     - Network Commissioning
-    - Network Identity Management
     - Operational State
     - Oven Cavity Operational State
     - Oven Mode
@@ -43,11 +42,8 @@ CommandHandlerInterfaceOnlyClusters:
     - RVC Run Mode
     - Refrigerator And Temperature Controlled Cabinet Mode
     - Sample MEI
-    - Scenes Management
     - Service Area
     - Soil Measurement
-    - TLS Certificate Management
-    - TLS Client Management
     - Thread Border Router Management
     - Thread Network Directory
     - Water Heater Management
