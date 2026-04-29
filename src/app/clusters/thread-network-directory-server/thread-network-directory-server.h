@@ -18,4 +18,4 @@
 #pragma once
 // TODO: This file is used to keep backwards compatibility after CodeDriven migration, should be changed to
 //  point to CodegenIntegration or similar after the cluster is properly migrated.
-#include "thread-network-directory-server.h"
+#include "ThreadNetworkDirectoryCluster.h"
