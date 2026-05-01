@@ -19,12 +19,8 @@
 
 #include <app/server-cluster/DefaultServerCluster.h>
 
-#include <app-common/zap-generated/cluster-objects.h>
-#include <app/AttributeAccessInterface.h>
-#include <app/CommandHandlerInterface.h>
-#include <app/clusters/thread-network-directory-server/DefaultThreadNetworkDirectoryStorage.h>
 #include <app/clusters/thread-network-directory-server/ThreadNetworkDirectoryStorage.h>
-#include <app/server/Server.h>
+#include <clusters/ThreadNetworkDirectory/Commands.h>
 #include <lib/core/CHIPError.h>
 
 #include <optional>
