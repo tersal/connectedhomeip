@@ -55,6 +55,7 @@ source_set("clusters") {
     "temperature-measurement-server",
     "tls-certificate-management-server",
     "tls-client-management-server",
+    "thread-network-directory-server",
     "webrtc-transport-provider-server",
     "wifi-network-diagnostics-server",
 
