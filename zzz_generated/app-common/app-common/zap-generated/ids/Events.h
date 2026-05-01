@@ -99,6 +99,7 @@
 #include <clusters/MicrowaveOvenMode/EventIds.h>
 #include <clusters/ModeSelect/EventIds.h>
 #include <clusters/NetworkCommissioning/EventIds.h>
+#include <clusters/NetworkIdentityManagement/EventIds.h>
 #include <clusters/NitrogenDioxideConcentrationMeasurement/EventIds.h>
 #include <clusters/OccupancySensing/EventIds.h>
 #include <clusters/OnOff/EventIds.h>
@@ -116,6 +117,7 @@
 #include <clusters/PowerSourceConfiguration/EventIds.h>
 #include <clusters/PowerTopology/EventIds.h>
 #include <clusters/PressureMeasurement/EventIds.h>
+#include <clusters/ProximityRanging/EventIds.h>
 #include <clusters/ProxyConfiguration/EventIds.h>
 #include <clusters/ProxyDiscovery/EventIds.h>
 #include <clusters/ProxyValid/EventIds.h>

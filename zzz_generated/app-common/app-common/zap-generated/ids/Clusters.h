@@ -99,6 +99,7 @@
 #include <clusters/MicrowaveOvenMode/ClusterId.h>
 #include <clusters/ModeSelect/ClusterId.h>
 #include <clusters/NetworkCommissioning/ClusterId.h>
+#include <clusters/NetworkIdentityManagement/ClusterId.h>
 #include <clusters/NitrogenDioxideConcentrationMeasurement/ClusterId.h>
 #include <clusters/OccupancySensing/ClusterId.h>
 #include <clusters/OnOff/ClusterId.h>
@@ -116,6 +117,7 @@
 #include <clusters/PowerSourceConfiguration/ClusterId.h>
 #include <clusters/PowerTopology/ClusterId.h>
 #include <clusters/PressureMeasurement/ClusterId.h>
+#include <clusters/ProximityRanging/ClusterId.h>
 #include <clusters/ProxyConfiguration/ClusterId.h>
 #include <clusters/ProxyDiscovery/ClusterId.h>
 #include <clusters/ProxyValid/ClusterId.h>

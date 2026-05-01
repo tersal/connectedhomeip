@@ -339,6 +339,10 @@
 #include <clusters/NetworkCommissioning/Commands.ipp>
 #include <clusters/NetworkCommissioning/Events.ipp>
 #include <clusters/NetworkCommissioning/Structs.ipp>
+#include <clusters/NetworkIdentityManagement/Attributes.ipp>
+#include <clusters/NetworkIdentityManagement/Commands.ipp>
+#include <clusters/NetworkIdentityManagement/Events.ipp>
+#include <clusters/NetworkIdentityManagement/Structs.ipp>
 #include <clusters/NitrogenDioxideConcentrationMeasurement/Attributes.ipp>
 #include <clusters/NitrogenDioxideConcentrationMeasurement/Commands.ipp>
 #include <clusters/NitrogenDioxideConcentrationMeasurement/Events.ipp>
@@ -407,6 +411,10 @@
 #include <clusters/PressureMeasurement/Commands.ipp>
 #include <clusters/PressureMeasurement/Events.ipp>
 #include <clusters/PressureMeasurement/Structs.ipp>
+#include <clusters/ProximityRanging/Attributes.ipp>
+#include <clusters/ProximityRanging/Commands.ipp>
+#include <clusters/ProximityRanging/Events.ipp>
+#include <clusters/ProximityRanging/Structs.ipp>
 #include <clusters/ProxyConfiguration/Attributes.ipp>
 #include <clusters/ProxyConfiguration/Commands.ipp>
 #include <clusters/ProxyConfiguration/Events.ipp>
@@ -669,6 +677,17 @@ bool CommandNeedsTimedInvoke(ClusterId aCluster, CommandId aCommand)
         {
         case Clusters::ClosureDimension::Commands::SetTarget::Id:
         case Clusters::ClosureDimension::Commands::Step::Id:
+            return true;
+        default:
+            return false;
+        }
+    }
+    case Clusters::NetworkIdentityManagement::Id: {
+        switch (aCommand)
+        {
+        case Clusters::NetworkIdentityManagement::Commands::AddClient::Id:
+        case Clusters::NetworkIdentityManagement::Commands::RemoveClient::Id:
+        case Clusters::NetworkIdentityManagement::Commands::ImportAdminSecret::Id:
             return true;
         default:
             return false;
@@ -1236,6 +1255,20 @@ bool CommandIsFabricScoped(ClusterId aCluster, CommandId aCommand)
         }
     }
     case Clusters::ColorControl::Id: {
+        switch (aCommand)
+        {
+        default:
+            return false;
+        }
+    }
+    case Clusters::ProximityRanging::Id: {
+        switch (aCommand)
+        {
+        default:
+            return false;
+        }
+    }
+    case Clusters::NetworkIdentityManagement::Id: {
         switch (aCommand)
         {
         default:

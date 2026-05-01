@@ -2926,6 +2926,10 @@ public class ClusterWriteMapping {
     );
     writeAmbientContextSensingInteractionInfo.put("writeHoldTimeAttribute", writeAmbientContextSensingHoldTimeAttributeInteractionInfo);
     writeAttributeMap.put("ambientContextSensing", writeAmbientContextSensingInteractionInfo);
+    Map<String, InteractionInfo> writeProximityRangingInteractionInfo = new LinkedHashMap<>();
+    writeAttributeMap.put("proximityRanging", writeProximityRangingInteractionInfo);
+    Map<String, InteractionInfo> writeNetworkIdentityManagementInteractionInfo = new LinkedHashMap<>();
+    writeAttributeMap.put("networkIdentityManagement", writeNetworkIdentityManagementInteractionInfo);
     Map<String, InteractionInfo> writeWiFiNetworkManagementInteractionInfo = new LinkedHashMap<>();
     writeAttributeMap.put("wiFiNetworkManagement", writeWiFiNetworkManagementInteractionInfo);
     Map<String, InteractionInfo> writeThreadBorderRouterManagementInteractionInfo = new LinkedHashMap<>();

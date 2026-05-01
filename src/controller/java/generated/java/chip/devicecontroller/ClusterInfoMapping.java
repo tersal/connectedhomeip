@@ -16639,6 +16639,306 @@ public class ClusterInfoMapping {
   }
 
 
+  public static class DelegatedProximityRangingClusterStartRangingResponseCallback implements ChipClusters.ProximityRangingCluster.StartRangingResponseCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(Integer resultCode, @Nullable Integer sessionID) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+
+      CommandResponseInfo resultCodeResponseValue = new CommandResponseInfo("resultCode", "Integer");
+      responseValues.put(resultCodeResponseValue, resultCode);
+      CommandResponseInfo sessionIDResponseValue = new CommandResponseInfo("sessionID", "Integer");
+      responseValues.put(sessionIDResponseValue, sessionID);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception error) {
+      callback.onFailure(error);
+    }
+  }
+  public static class DelegatedProximityRangingClusterRangingCapabilitiesAttributeCallback implements ChipClusters.ProximityRangingCluster.RangingCapabilitiesAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(List<ChipStructs.ProximityRangingClusterRangingCapabilitiesStruct> valueList) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo commandResponseInfo = new CommandResponseInfo("valueList", "List<ChipStructs.ProximityRangingClusterRangingCapabilitiesStruct>");
+      responseValues.put(commandResponseInfo, valueList);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      callback.onFailure(ex);
+    }
+  }
+
+  public static class DelegatedProximityRangingClusterSessionIDListAttributeCallback implements ChipClusters.ProximityRangingCluster.SessionIDListAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(@Nullable List<Integer> valueList) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo commandResponseInfo = new CommandResponseInfo("valueList", "List<Integer>");
+      responseValues.put(commandResponseInfo, valueList);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      callback.onFailure(ex);
+    }
+  }
+
+  public static class DelegatedProximityRangingClusterGeneratedCommandListAttributeCallback implements ChipClusters.ProximityRangingCluster.GeneratedCommandListAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(List<Long> valueList) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo commandResponseInfo = new CommandResponseInfo("valueList", "List<Long>");
+      responseValues.put(commandResponseInfo, valueList);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      callback.onFailure(ex);
+    }
+  }
+
+  public static class DelegatedProximityRangingClusterAcceptedCommandListAttributeCallback implements ChipClusters.ProximityRangingCluster.AcceptedCommandListAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(List<Long> valueList) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo commandResponseInfo = new CommandResponseInfo("valueList", "List<Long>");
+      responseValues.put(commandResponseInfo, valueList);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      callback.onFailure(ex);
+    }
+  }
+
+  public static class DelegatedProximityRangingClusterAttributeListAttributeCallback implements ChipClusters.ProximityRangingCluster.AttributeListAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(List<Long> valueList) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo commandResponseInfo = new CommandResponseInfo("valueList", "List<Long>");
+      responseValues.put(commandResponseInfo, valueList);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      callback.onFailure(ex);
+    }
+  }
+
+
+  public static class DelegatedNetworkIdentityManagementClusterAddClientResponseCallback implements ChipClusters.NetworkIdentityManagementCluster.AddClientResponseCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(Integer clientIndex) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+
+      CommandResponseInfo clientIndexResponseValue = new CommandResponseInfo("clientIndex", "Integer");
+      responseValues.put(clientIndexResponseValue, clientIndex);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception error) {
+      callback.onFailure(error);
+    }
+  }
+
+  public static class DelegatedNetworkIdentityManagementClusterQueryIdentityResponseCallback implements ChipClusters.NetworkIdentityManagementCluster.QueryIdentityResponseCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(byte[] identity) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+
+      CommandResponseInfo identityResponseValue = new CommandResponseInfo("identity", "byte[]");
+      responseValues.put(identityResponseValue, identity);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception error) {
+      callback.onFailure(error);
+    }
+  }
+
+  public static class DelegatedNetworkIdentityManagementClusterExportAdminSecretResponseCallback implements ChipClusters.NetworkIdentityManagementCluster.ExportAdminSecretResponseCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(byte[] networkAdministratorSharedSecret) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+
+      CommandResponseInfo networkAdministratorSharedSecretResponseValue = new CommandResponseInfo("networkAdministratorSharedSecret", "byte[]");
+      responseValues.put(networkAdministratorSharedSecretResponseValue, networkAdministratorSharedSecret);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception error) {
+      callback.onFailure(error);
+    }
+  }
+  public static class DelegatedNetworkIdentityManagementClusterActiveNetworkIdentitiesAttributeCallback implements ChipClusters.NetworkIdentityManagementCluster.ActiveNetworkIdentitiesAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(List<ChipStructs.NetworkIdentityManagementClusterActiveNetworkIdentityStruct> valueList) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo commandResponseInfo = new CommandResponseInfo("valueList", "List<ChipStructs.NetworkIdentityManagementClusterActiveNetworkIdentityStruct>");
+      responseValues.put(commandResponseInfo, valueList);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      callback.onFailure(ex);
+    }
+  }
+
+  public static class DelegatedNetworkIdentityManagementClusterClientsAttributeCallback implements ChipClusters.NetworkIdentityManagementCluster.ClientsAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(List<ChipStructs.NetworkIdentityManagementClusterClientStruct> valueList) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo commandResponseInfo = new CommandResponseInfo("valueList", "List<ChipStructs.NetworkIdentityManagementClusterClientStruct>");
+      responseValues.put(commandResponseInfo, valueList);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      callback.onFailure(ex);
+    }
+  }
+
+  public static class DelegatedNetworkIdentityManagementClusterGeneratedCommandListAttributeCallback implements ChipClusters.NetworkIdentityManagementCluster.GeneratedCommandListAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(List<Long> valueList) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo commandResponseInfo = new CommandResponseInfo("valueList", "List<Long>");
+      responseValues.put(commandResponseInfo, valueList);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      callback.onFailure(ex);
+    }
+  }
+
+  public static class DelegatedNetworkIdentityManagementClusterAcceptedCommandListAttributeCallback implements ChipClusters.NetworkIdentityManagementCluster.AcceptedCommandListAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(List<Long> valueList) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo commandResponseInfo = new CommandResponseInfo("valueList", "List<Long>");
+      responseValues.put(commandResponseInfo, valueList);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      callback.onFailure(ex);
+    }
+  }
+
+  public static class DelegatedNetworkIdentityManagementClusterAttributeListAttributeCallback implements ChipClusters.NetworkIdentityManagementCluster.AttributeListAttributeCallback, DelegatedClusterCallback {
+    private ClusterCommandCallback callback;
+    @Override
+    public void setCallbackDelegate(ClusterCommandCallback callback) {
+      this.callback = callback;
+    }
+
+    @Override
+    public void onSuccess(List<Long> valueList) {
+      Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
+      CommandResponseInfo commandResponseInfo = new CommandResponseInfo("valueList", "List<Long>");
+      responseValues.put(commandResponseInfo, valueList);
+      callback.onSuccess(responseValues);
+    }
+
+    @Override
+    public void onError(Exception ex) {
+      callback.onFailure(ex);
+    }
+  }
+
+
   public static class DelegatedWiFiNetworkManagementClusterNetworkPassphraseResponseCallback implements ChipClusters.WiFiNetworkManagementCluster.NetworkPassphraseResponseCallback, DelegatedClusterCallback {
     private ClusterCommandCallback callback;
     @Override
@@ -20791,10 +21091,12 @@ public class ClusterInfoMapping {
     }
 
     @Override
-    public void onSuccess(byte[] icaccsr) {
+    public void onSuccess(Integer statusCode, Optional<byte[]> icaccsr) {
       Map<CommandResponseInfo, Object> responseValues = new LinkedHashMap<>();
 
-      CommandResponseInfo icaccsrResponseValue = new CommandResponseInfo("icaccsr", "byte[]");
+      CommandResponseInfo statusCodeResponseValue = new CommandResponseInfo("statusCode", "Integer");
+      responseValues.put(statusCodeResponseValue, statusCode);
+      CommandResponseInfo icaccsrResponseValue = new CommandResponseInfo("icaccsr", "Optional<byte[]>");
       responseValues.put(icaccsrResponseValue, icaccsr);
       callback.onSuccess(responseValues);
     }
@@ -23615,6 +23917,14 @@ public class ClusterInfoMapping {
       (ptr, endpointId) -> new ChipClusters.AmbientContextSensingCluster(ptr, endpointId), new HashMap<>());
     clusterMap.put("ambientContextSensing", ambientContextSensingClusterInfo);
 
+    ClusterInfo proximityRangingClusterInfo = new ClusterInfo(
+      (ptr, endpointId) -> new ChipClusters.ProximityRangingCluster(ptr, endpointId), new HashMap<>());
+    clusterMap.put("proximityRanging", proximityRangingClusterInfo);
+
+    ClusterInfo networkIdentityManagementClusterInfo = new ClusterInfo(
+      (ptr, endpointId) -> new ChipClusters.NetworkIdentityManagementCluster(ptr, endpointId), new HashMap<>());
+    clusterMap.put("networkIdentityManagement", networkIdentityManagementClusterInfo);
+
     ClusterInfo wiFiNetworkManagementClusterInfo = new ClusterInfo(
       (ptr, endpointId) -> new ChipClusters.WiFiNetworkManagementCluster(ptr, endpointId), new HashMap<>());
     clusterMap.put("wiFiNetworkManagement", wiFiNetworkManagementClusterInfo);
@@ -23871,6 +24181,8 @@ public class ClusterInfoMapping {
     destination.get("radonConcentrationMeasurement").combineCommands(source.get("radonConcentrationMeasurement"));
     destination.get("soilMeasurement").combineCommands(source.get("soilMeasurement"));
     destination.get("ambientContextSensing").combineCommands(source.get("ambientContextSensing"));
+    destination.get("proximityRanging").combineCommands(source.get("proximityRanging"));
+    destination.get("networkIdentityManagement").combineCommands(source.get("networkIdentityManagement"));
     destination.get("wiFiNetworkManagement").combineCommands(source.get("wiFiNetworkManagement"));
     destination.get("threadBorderRouterManagement").combineCommands(source.get("threadBorderRouterManagement"));
     destination.get("threadNetworkDirectory").combineCommands(source.get("threadNetworkDirectory"));
@@ -29332,6 +29644,186 @@ public class ClusterInfoMapping {
 
     commandMap.put("ambientContextSensing", ambientContextSensingClusterInteractionInfoMap);
 
+    Map<String, InteractionInfo> proximityRangingClusterInteractionInfoMap = new LinkedHashMap<>();
+
+    Map<String, CommandParameterInfo> proximityRangingstartRangingRequestCommandParams = new LinkedHashMap<String, CommandParameterInfo>();
+
+    CommandParameterInfo proximityRangingstartRangingRequesttechnologyCommandParameterInfo = new CommandParameterInfo("technology", Integer.class, Integer.class);
+    proximityRangingstartRangingRequestCommandParams.put("technology",proximityRangingstartRangingRequesttechnologyCommandParameterInfo);
+
+
+
+
+    CommandParameterInfo proximityRangingstartRangingRequestfrequencyBandCommandParameterInfo = new CommandParameterInfo("frequencyBand", Optional.class, Integer.class);
+    proximityRangingstartRangingRequestCommandParams.put("frequencyBand",proximityRangingstartRangingRequestfrequencyBandCommandParameterInfo);
+
+    CommandParameterInfo proximityRangingstartRangingRequestbandwidthCommandParameterInfo = new CommandParameterInfo("bandwidth", Optional.class, Long.class);
+    proximityRangingstartRangingRequestCommandParams.put("bandwidth",proximityRangingstartRangingRequestbandwidthCommandParameterInfo);
+
+    CommandParameterInfo proximityRangingstartRangingRequestsecurityModeCommandParameterInfo = new CommandParameterInfo("securityMode", Integer.class, Integer.class);
+    proximityRangingstartRangingRequestCommandParams.put("securityMode",proximityRangingstartRangingRequestsecurityModeCommandParameterInfo);
+
+
+    InteractionInfo proximityRangingstartRangingRequestInteractionInfo = new InteractionInfo(
+      (cluster, callback, commandArguments) -> {
+        ((ChipClusters.ProximityRangingCluster) cluster)
+          .startRangingRequest((ChipClusters.ProximityRangingCluster.StartRangingResponseCallback) callback
+           , (Integer)
+             commandArguments.get("technology")
+
+           , (Optional<ChipStructs.ProximityRangingClusterWiFiRangingDeviceRoleConfigStruct>)
+             commandArguments.get("wiFiRangingDeviceRoleConfig")
+
+           , (Optional<ChipStructs.ProximityRangingClusterBLERangingDeviceRoleConfigStruct>)
+             commandArguments.get("BLERangingDeviceRoleConfig")
+
+           , (Optional<ChipStructs.ProximityRangingClusterBLTChannelSoundingDeviceRoleConfigStruct>)
+             commandArguments.get("BLTChannelSoundingDeviceRoleConfig")
+
+           , (Optional<Integer>)
+             commandArguments.get("frequencyBand")
+
+           , (Optional<Long>)
+             commandArguments.get("bandwidth")
+
+           , (Integer)
+             commandArguments.get("securityMode")
+
+           , (ChipStructs.ProximityRangingClusterRangingTriggerConditionStruct)
+             commandArguments.get("trigger")
+
+           , (Optional<ChipStructs.ProximityRangingClusterReportingConditionStruct>)
+             commandArguments.get("reportingCondition")
+
+            );
+        },
+        () -> new DelegatedProximityRangingClusterStartRangingResponseCallback(),
+        proximityRangingstartRangingRequestCommandParams
+      );
+    proximityRangingClusterInteractionInfoMap.put("startRangingRequest", proximityRangingstartRangingRequestInteractionInfo);
+
+    Map<String, CommandParameterInfo> proximityRangingstopRangingRequestCommandParams = new LinkedHashMap<String, CommandParameterInfo>();
+
+    CommandParameterInfo proximityRangingstopRangingRequestsessionIDCommandParameterInfo = new CommandParameterInfo("sessionID", Integer.class, Integer.class);
+    proximityRangingstopRangingRequestCommandParams.put("sessionID",proximityRangingstopRangingRequestsessionIDCommandParameterInfo);
+    InteractionInfo proximityRangingstopRangingRequestInteractionInfo = new InteractionInfo(
+      (cluster, callback, commandArguments) -> {
+        ((ChipClusters.ProximityRangingCluster) cluster)
+        .stopRangingRequest((DefaultClusterCallback) callback
+        , (Integer)
+        commandArguments.get("sessionID")
+        );
+      },
+      () -> new DelegatedDefaultClusterCallback(),
+        proximityRangingstopRangingRequestCommandParams
+    );
+    proximityRangingClusterInteractionInfoMap.put("stopRangingRequest", proximityRangingstopRangingRequestInteractionInfo);
+
+    commandMap.put("proximityRanging", proximityRangingClusterInteractionInfoMap);
+
+    Map<String, InteractionInfo> networkIdentityManagementClusterInteractionInfoMap = new LinkedHashMap<>();
+
+    Map<String, CommandParameterInfo> networkIdentityManagementaddClientCommandParams = new LinkedHashMap<String, CommandParameterInfo>();
+
+    CommandParameterInfo networkIdentityManagementaddClientclientIdentityCommandParameterInfo = new CommandParameterInfo("clientIdentity", byte[].class, byte[].class);
+    networkIdentityManagementaddClientCommandParams.put("clientIdentity",networkIdentityManagementaddClientclientIdentityCommandParameterInfo);
+    InteractionInfo networkIdentityManagementaddClientInteractionInfo = new InteractionInfo(
+      (cluster, callback, commandArguments) -> {
+        ((ChipClusters.NetworkIdentityManagementCluster) cluster)
+          .addClient((ChipClusters.NetworkIdentityManagementCluster.AddClientResponseCallback) callback
+           , (byte[])
+             commandArguments.get("clientIdentity")
+
+            , 10000);
+        },
+        () -> new DelegatedNetworkIdentityManagementClusterAddClientResponseCallback(),
+        networkIdentityManagementaddClientCommandParams
+      );
+    networkIdentityManagementClusterInteractionInfoMap.put("addClient", networkIdentityManagementaddClientInteractionInfo);
+
+    Map<String, CommandParameterInfo> networkIdentityManagementremoveClientCommandParams = new LinkedHashMap<String, CommandParameterInfo>();
+
+    CommandParameterInfo networkIdentityManagementremoveClientclientIndexCommandParameterInfo = new CommandParameterInfo("clientIndex", Optional.class, Integer.class);
+    networkIdentityManagementremoveClientCommandParams.put("clientIndex",networkIdentityManagementremoveClientclientIndexCommandParameterInfo);
+
+    CommandParameterInfo networkIdentityManagementremoveClientclientIdentifierCommandParameterInfo = new CommandParameterInfo("clientIdentifier", Optional.class, byte[].class);
+    networkIdentityManagementremoveClientCommandParams.put("clientIdentifier",networkIdentityManagementremoveClientclientIdentifierCommandParameterInfo);
+    InteractionInfo networkIdentityManagementremoveClientInteractionInfo = new InteractionInfo(
+      (cluster, callback, commandArguments) -> {
+        ((ChipClusters.NetworkIdentityManagementCluster) cluster)
+        .removeClient((DefaultClusterCallback) callback
+        , (Optional<Integer>)
+        commandArguments.get("clientIndex")
+        , (Optional<byte[]>)
+        commandArguments.get("clientIdentifier"), 10000
+        );
+      },
+      () -> new DelegatedDefaultClusterCallback(),
+        networkIdentityManagementremoveClientCommandParams
+    );
+    networkIdentityManagementClusterInteractionInfoMap.put("removeClient", networkIdentityManagementremoveClientInteractionInfo);
+
+    Map<String, CommandParameterInfo> networkIdentityManagementqueryIdentityCommandParams = new LinkedHashMap<String, CommandParameterInfo>();
+
+    CommandParameterInfo networkIdentityManagementqueryIdentitynetworkIdentityIndexCommandParameterInfo = new CommandParameterInfo("networkIdentityIndex", Optional.class, Integer.class);
+    networkIdentityManagementqueryIdentityCommandParams.put("networkIdentityIndex",networkIdentityManagementqueryIdentitynetworkIdentityIndexCommandParameterInfo);
+
+    CommandParameterInfo networkIdentityManagementqueryIdentitynetworkIdentityTypeCommandParameterInfo = new CommandParameterInfo("networkIdentityType", Optional.class, Integer.class);
+    networkIdentityManagementqueryIdentityCommandParams.put("networkIdentityType",networkIdentityManagementqueryIdentitynetworkIdentityTypeCommandParameterInfo);
+
+    CommandParameterInfo networkIdentityManagementqueryIdentityidentifierCommandParameterInfo = new CommandParameterInfo("identifier", Optional.class, byte[].class);
+    networkIdentityManagementqueryIdentityCommandParams.put("identifier",networkIdentityManagementqueryIdentityidentifierCommandParameterInfo);
+    InteractionInfo networkIdentityManagementqueryIdentityInteractionInfo = new InteractionInfo(
+      (cluster, callback, commandArguments) -> {
+        ((ChipClusters.NetworkIdentityManagementCluster) cluster)
+          .queryIdentity((ChipClusters.NetworkIdentityManagementCluster.QueryIdentityResponseCallback) callback
+           , (Optional<Integer>)
+             commandArguments.get("networkIdentityIndex")
+
+           , (Optional<Integer>)
+             commandArguments.get("networkIdentityType")
+
+           , (Optional<byte[]>)
+             commandArguments.get("identifier")
+
+            );
+        },
+        () -> new DelegatedNetworkIdentityManagementClusterQueryIdentityResponseCallback(),
+        networkIdentityManagementqueryIdentityCommandParams
+      );
+    networkIdentityManagementClusterInteractionInfoMap.put("queryIdentity", networkIdentityManagementqueryIdentityInteractionInfo);
+
+    Map<String, CommandParameterInfo> networkIdentityManagementimportAdminSecretCommandParams = new LinkedHashMap<String, CommandParameterInfo>();
+
+    CommandParameterInfo networkIdentityManagementimportAdminSecretnetworkAdministratorSharedSecretCommandParameterInfo = new CommandParameterInfo("networkAdministratorSharedSecret", byte[].class, byte[].class);
+    networkIdentityManagementimportAdminSecretCommandParams.put("networkAdministratorSharedSecret",networkIdentityManagementimportAdminSecretnetworkAdministratorSharedSecretCommandParameterInfo);
+    InteractionInfo networkIdentityManagementimportAdminSecretInteractionInfo = new InteractionInfo(
+      (cluster, callback, commandArguments) -> {
+        ((ChipClusters.NetworkIdentityManagementCluster) cluster)
+        .importAdminSecret((DefaultClusterCallback) callback
+        , (byte[])
+        commandArguments.get("networkAdministratorSharedSecret"), 10000
+        );
+      },
+      () -> new DelegatedDefaultClusterCallback(),
+        networkIdentityManagementimportAdminSecretCommandParams
+    );
+    networkIdentityManagementClusterInteractionInfoMap.put("importAdminSecret", networkIdentityManagementimportAdminSecretInteractionInfo);
+
+    Map<String, CommandParameterInfo> networkIdentityManagementexportAdminSecretCommandParams = new LinkedHashMap<String, CommandParameterInfo>();
+    InteractionInfo networkIdentityManagementexportAdminSecretInteractionInfo = new InteractionInfo(
+      (cluster, callback, commandArguments) -> {
+        ((ChipClusters.NetworkIdentityManagementCluster) cluster)
+          .exportAdminSecret((ChipClusters.NetworkIdentityManagementCluster.ExportAdminSecretResponseCallback) callback
+            );
+        },
+        () -> new DelegatedNetworkIdentityManagementClusterExportAdminSecretResponseCallback(),
+        networkIdentityManagementexportAdminSecretCommandParams
+      );
+    networkIdentityManagementClusterInteractionInfoMap.put("exportAdminSecret", networkIdentityManagementexportAdminSecretInteractionInfo);
+
+    commandMap.put("networkIdentityManagement", networkIdentityManagementClusterInteractionInfoMap);
+
     Map<String, InteractionInfo> wiFiNetworkManagementClusterInteractionInfoMap = new LinkedHashMap<>();
 
     Map<String, CommandParameterInfo> wiFiNetworkManagementnetworkPassphraseRequestCommandParams = new LinkedHashMap<String, CommandParameterInfo>();
@@ -31844,10 +32336,10 @@ public class ClusterInfoMapping {
     CommandParameterInfo jointFabricDatastoreupdateAdminnodeIDCommandParameterInfo = new CommandParameterInfo("nodeID", Long.class, Long.class);
     jointFabricDatastoreupdateAdminCommandParams.put("nodeID",jointFabricDatastoreupdateAdminnodeIDCommandParameterInfo);
 
-    CommandParameterInfo jointFabricDatastoreupdateAdminfriendlyNameCommandParameterInfo = new CommandParameterInfo("friendlyName", String.class, String.class);
+    CommandParameterInfo jointFabricDatastoreupdateAdminfriendlyNameCommandParameterInfo = new CommandParameterInfo("friendlyName", Optional.class, String.class);
     jointFabricDatastoreupdateAdminCommandParams.put("friendlyName",jointFabricDatastoreupdateAdminfriendlyNameCommandParameterInfo);
 
-    CommandParameterInfo jointFabricDatastoreupdateAdminicacCommandParameterInfo = new CommandParameterInfo("icac", byte[].class, byte[].class);
+    CommandParameterInfo jointFabricDatastoreupdateAdminicacCommandParameterInfo = new CommandParameterInfo("icac", Optional.class, byte[].class);
     jointFabricDatastoreupdateAdminCommandParams.put("icac",jointFabricDatastoreupdateAdminicacCommandParameterInfo);
     InteractionInfo jointFabricDatastoreupdateAdminInteractionInfo = new InteractionInfo(
       (cluster, callback, commandArguments) -> {
@@ -31855,9 +32347,9 @@ public class ClusterInfoMapping {
         .updateAdmin((DefaultClusterCallback) callback
         , (Long)
         commandArguments.get("nodeID")
-        , (String)
+        , (Optional<String>)
         commandArguments.get("friendlyName")
-        , (byte[])
+        , (Optional<byte[]>)
         commandArguments.get("icac")
         );
       },

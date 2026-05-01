@@ -339,6 +339,10 @@
 #include <clusters/NetworkCommissioning/Commands.h>
 #include <clusters/NetworkCommissioning/Events.h>
 #include <clusters/NetworkCommissioning/Structs.h>
+#include <clusters/NetworkIdentityManagement/Attributes.h>
+#include <clusters/NetworkIdentityManagement/Commands.h>
+#include <clusters/NetworkIdentityManagement/Events.h>
+#include <clusters/NetworkIdentityManagement/Structs.h>
 #include <clusters/NitrogenDioxideConcentrationMeasurement/Attributes.h>
 #include <clusters/NitrogenDioxideConcentrationMeasurement/Commands.h>
 #include <clusters/NitrogenDioxideConcentrationMeasurement/Events.h>
@@ -407,6 +411,10 @@
 #include <clusters/PressureMeasurement/Commands.h>
 #include <clusters/PressureMeasurement/Events.h>
 #include <clusters/PressureMeasurement/Structs.h>
+#include <clusters/ProximityRanging/Attributes.h>
+#include <clusters/ProximityRanging/Commands.h>
+#include <clusters/ProximityRanging/Events.h>
+#include <clusters/ProximityRanging/Structs.h>
 #include <clusters/ProxyConfiguration/Attributes.h>
 #include <clusters/ProxyConfiguration/Commands.h>
 #include <clusters/ProxyConfiguration/Events.h>
