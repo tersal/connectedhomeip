@@ -16,8 +16,8 @@
  */
 
 #include <app/clusters/thread-network-directory-server/CodegenIntegration.h>
-#include <data-model-providers/codegen/CodegenDataModelProvider.h>
 #include <data-model-providers/codegen/ClusterIntegration.h>
+#include <data-model-providers/codegen/CodegenDataModelProvider.h>
 
 using namespace chip::app;
 using namespace chip::app::Clusters;

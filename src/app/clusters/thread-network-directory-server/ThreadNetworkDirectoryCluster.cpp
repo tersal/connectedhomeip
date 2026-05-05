@@ -15,13 +15,13 @@
  *    limitations under the License.
  */
 
-#include <app/server-cluster/AttributeListBuilder.h>
-#include <clusters/ThreadNetworkDirectory/Metadata.h>
-#include <app/clusters/thread-network-directory-server/ThreadNetworkDirectoryCluster.h>
 #include <app/MessageDef/StatusIB.h>
 #include <app/SafeAttributePersistenceProvider.h>
+#include <app/clusters/thread-network-directory-server/ThreadNetworkDirectoryCluster.h>
 #include <app/data-model/Nullable.h>
 #include <app/reporting/reporting.h>
+#include <app/server-cluster/AttributeListBuilder.h>
+#include <clusters/ThreadNetworkDirectory/Metadata.h>
 #include <lib/support/CodeUtils.h>
 #include <lib/support/ThreadOperationalDataset.h>
 
@@ -38,19 +38,20 @@ namespace chip {
 namespace app {
 namespace Clusters {
 
-ThreadNetworkDirectoryCluster::ThreadNetworkDirectoryCluster(EndpointId endpointId, ThreadNetworkDirectoryStorage & storage) 
-: DefaultServerCluster({ endpointId, ThreadNetworkDirectory::Id }), mStorage(storage) 
-{ }
+ThreadNetworkDirectoryCluster::ThreadNetworkDirectoryCluster(EndpointId endpointId, ThreadNetworkDirectoryStorage & storage) :
+    DefaultServerCluster({ endpointId, ThreadNetworkDirectory::Id }), mStorage(storage)
+{}
 
-CHIP_ERROR ThreadNetworkDirectoryCluster::Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
+CHIP_ERROR ThreadNetworkDirectoryCluster::Attributes(const ConcreteClusterPath & path,
+                                                     ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder)
 {
     // This cluster only has Mandatory attributes
     AttributeListBuilder listBuilder(builder);
     return listBuilder.Append(Span(ThreadNetworkDirectory::Attributes::kMandatoryMetadata), {});
 }
 
-CHIP_ERROR ThreadNetworkDirectoryCluster::AcceptedCommands(
-    const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder)
+CHIP_ERROR ThreadNetworkDirectoryCluster::AcceptedCommands(const ConcreteClusterPath & path,
+                                                           ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder)
 {
     static constexpr DataModel::AcceptedCommandEntry kCommands[] = {
         ThreadNetworkDirectory::Commands::AddNetwork::kMetadataEntry,
@@ -60,8 +61,8 @@ CHIP_ERROR ThreadNetworkDirectoryCluster::AcceptedCommands(
     return builder.ReferenceExisting(Span(kCommands));
 }
 
-CHIP_ERROR ThreadNetworkDirectoryCluster::GeneratedCommands(
-    const ConcreteClusterPath & path, ReadOnlyBufferBuilder<CommandId> & builder)
+CHIP_ERROR ThreadNetworkDirectoryCluster::GeneratedCommands(const ConcreteClusterPath & path,
+                                                            ReadOnlyBufferBuilder<CommandId> & builder)
 {
     static constexpr CommandId kResponses[] = {
         ThreadNetworkDirectory::Commands::OperationalDatasetResponse::Id,
@@ -70,7 +71,7 @@ CHIP_ERROR ThreadNetworkDirectoryCluster::GeneratedCommands(
 }
 
 DataModel::ActionReturnStatus ThreadNetworkDirectoryCluster::ReadAttribute(const DataModel::ReadAttributeRequest & request,
-                                                AttributeValueEncoder & encoder)
+                                                                           AttributeValueEncoder & encoder)
 {
     switch (request.path.mAttributeId)
     {
@@ -84,7 +85,6 @@ DataModel::ActionReturnStatus ThreadNetworkDirectoryCluster::ReadAttribute(const
     case ThreadNetworkTableSize::Id:
         return encoder.Encode(mStorage.Capacity());
 
-
     case ClusterRevision::Id:
         return encoder.Encode(ThreadNetworkDirectory::kRevision);
 
@@ -94,7 +94,7 @@ DataModel::ActionReturnStatus ThreadNetworkDirectoryCluster::ReadAttribute(const
 }
 
 DataModel::ActionReturnStatus ThreadNetworkDirectoryCluster::WriteAttribute(const DataModel::WriteAttributeRequest & request,
-                                                 AttributeValueDecoder & decoder)
+                                                                            AttributeValueDecoder & decoder)
 {
     if (request.path.mAttributeId == PreferredExtendedPanID::Id)
     {
@@ -105,7 +105,7 @@ DataModel::ActionReturnStatus ThreadNetworkDirectoryCluster::WriteAttribute(cons
 }
 
 CHIP_ERROR ThreadNetworkDirectoryCluster::ReadExtendedPanId(const ConcreteDataAttributePath & aPath,
-                                                           std::optional<ExtendedPanId> & outExPanId)
+                                                            std::optional<ExtendedPanId> & outExPanId)
 {
     MutableByteSpan value(outExPanId.emplace().bytes);
     CHIP_ERROR err = GetSafeAttributePersistenceProvider()->SafeReadValue(aPath, value);
@@ -127,7 +127,7 @@ CHIP_ERROR ThreadNetworkDirectoryCluster::ReadExtendedPanId(const ConcreteDataAt
 }
 
 CHIP_ERROR ThreadNetworkDirectoryCluster::ReadPreferredExtendedPanId(const ConcreteDataAttributePath & aPath,
-                                                                    AttributeValueEncoder & aEncoder)
+                                                                     AttributeValueEncoder & aEncoder)
 {
     std::optional<ExtendedPanId> value;
     ReturnErrorOnFailure(ReadExtendedPanId(aPath, value));
@@ -135,7 +135,7 @@ CHIP_ERROR ThreadNetworkDirectoryCluster::ReadPreferredExtendedPanId(const Concr
 }
 
 CHIP_ERROR ThreadNetworkDirectoryCluster::WritePreferredExtendedPanId(const ConcreteDataAttributePath & aPath,
-                                                                     AttributeValueDecoder & aDecoder)
+                                                                      AttributeValueDecoder & aDecoder)
 {
     DataModel::Nullable<ByteSpan> nullableValue;
     ReturnErrorOnFailure(aDecoder.Decode(nullableValue));
@@ -182,27 +182,24 @@ CHIP_ERROR ThreadNetworkDirectoryCluster::ReadThreadNetworks(const ConcreteDataA
 }
 
 std::optional<DataModel::ActionReturnStatus> ThreadNetworkDirectoryCluster::InvokeCommand(const DataModel::InvokeRequest & request,
-                                                               chip::TLV::TLVReader & input_arguments,
-                                                               CommandHandler * handler)
+                                                                                          chip::TLV::TLVReader & input_arguments,
+                                                                                          CommandHandler * handler)
 {
     switch (request.path.mCommandId)
     {
-    case AddNetwork::Id:
-    {
+    case AddNetwork::Id: {
         ThreadNetworkDirectory::Commands::AddNetwork::DecodableType addNetworkReq;
         ReturnErrorOnFailure(addNetworkReq.Decode(input_arguments));
         HandleAddNetworkRequest(*handler, addNetworkReq, request.path);
         break;
     }
-    case RemoveNetwork::Id:
-    {
+    case RemoveNetwork::Id: {
         ThreadNetworkDirectory::Commands::RemoveNetwork::DecodableType removeNetworkReq;
         ReturnErrorOnFailure(removeNetworkReq.Decode(input_arguments));
         HandleRemoveNetworkRequest(*handler, removeNetworkReq, request.path);
         break;
     }
-    case GetOperationalDataset::Id:
-    {
+    case GetOperationalDataset::Id: {
         ThreadNetworkDirectory::Commands::GetOperationalDataset::DecodableType getOpDataset;
         ReturnErrorOnFailure(getOpDataset.Decode(input_arguments));
         HandleOperationalDatasetRequest(*handler, getOpDataset, request.path);
@@ -216,8 +213,8 @@ std::optional<DataModel::ActionReturnStatus> ThreadNetworkDirectoryCluster::Invo
 }
 
 void ThreadNetworkDirectoryCluster::HandleAddNetworkRequest(CommandHandler & ctx,
-                                                           const ThreadNetworkDirectory::Commands::AddNetwork::DecodableType & req, 
-                                                           const chip::app::ConcreteCommandPath & commandPath)
+                                                            const ThreadNetworkDirectory::Commands::AddNetwork::DecodableType & req,
+                                                            const chip::app::ConcreteCommandPath & commandPath)
 {
     OperationalDatasetView dataset;
     ByteSpan extendedPanIdSpan;
@@ -281,12 +278,13 @@ void ThreadNetworkDirectoryCluster::HandleAddNetworkRequest(CommandHandler & ctx
 
 exit:
     ChipLogError(Zcl, "AddNetwork: %" CHIP_ERROR_FORMAT, err.Format());
-    ctx.AddStatus(
-        commandPath, (status == IMStatus::Failure && err == CHIP_ERROR_NO_MEMORY) ? IMStatus::ResourceExhausted : status,
-        context);
+    ctx.AddStatus(commandPath, (status == IMStatus::Failure && err == CHIP_ERROR_NO_MEMORY) ? IMStatus::ResourceExhausted : status,
+                  context);
 }
 
-void ThreadNetworkDirectoryCluster::HandleRemoveNetworkRequest(CommandHandler & handler, const ThreadNetworkDirectory::Commands::RemoveNetwork::DecodableType & req, const chip::app::ConcreteCommandPath & commandPath)
+void ThreadNetworkDirectoryCluster::HandleRemoveNetworkRequest(
+    CommandHandler & handler, const ThreadNetworkDirectory::Commands::RemoveNetwork::DecodableType & req,
+    const chip::app::ConcreteCommandPath & commandPath)
 {
     CHIP_ERROR err;
 
@@ -319,7 +317,9 @@ exit:
     handler.AddStatus(commandPath, (err == CHIP_ERROR_NOT_FOUND) ? IMStatus::NotFound : IMStatus::Failure);
 }
 
-void ThreadNetworkDirectoryCluster::HandleOperationalDatasetRequest(CommandHandler & handler, const ThreadNetworkDirectory::Commands::GetOperationalDataset::DecodableType & req, const chip::app::ConcreteCommandPath & commandPath)
+void ThreadNetworkDirectoryCluster::HandleOperationalDatasetRequest(
+    CommandHandler & handler, const ThreadNetworkDirectory::Commands::GetOperationalDataset::DecodableType & req,
+    const chip::app::ConcreteCommandPath & commandPath)
 {
     CHIP_ERROR err;
 

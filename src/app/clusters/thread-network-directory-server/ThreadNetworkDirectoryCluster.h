@@ -32,7 +32,6 @@ namespace Clusters {
 class ThreadNetworkDirectoryCluster : public DefaultServerCluster
 {
 public:
-
     ThreadNetworkDirectoryCluster(EndpointId endpointId, ThreadNetworkDirectoryStorage & storage);
 
     // Server cluster implementation
@@ -46,8 +45,7 @@ public:
     CHIP_ERROR Attributes(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<DataModel::AttributeEntry> & builder) override;
     CHIP_ERROR AcceptedCommands(const ConcreteClusterPath & path,
                                 ReadOnlyBufferBuilder<DataModel::AcceptedCommandEntry> & builder) override;
-    CHIP_ERROR GeneratedCommands(const ConcreteClusterPath & path,
-                                ReadOnlyBufferBuilder<CommandId> & builder) override;
+    CHIP_ERROR GeneratedCommands(const ConcreteClusterPath & path, ReadOnlyBufferBuilder<CommandId> & builder) override;
 
 private:
     using ExtendedPanId = ThreadNetworkDirectoryStorage::ExtendedPanId;
@@ -59,9 +57,14 @@ private:
     CHIP_ERROR WritePreferredExtendedPanId(const ConcreteDataAttributePath & aPath, AttributeValueDecoder & aDecoder);
 
     // Command handling helpers
-    void HandleAddNetworkRequest(CommandHandler & handler, const ThreadNetworkDirectory::Commands::AddNetwork::DecodableType & req, const chip::app::ConcreteCommandPath & commandPath);
-    void HandleRemoveNetworkRequest(CommandHandler & handler, const ThreadNetworkDirectory::Commands::RemoveNetwork::DecodableType & req, const chip::app::ConcreteCommandPath & commandPath);
-    void HandleOperationalDatasetRequest(CommandHandler & handler, const ThreadNetworkDirectory::Commands::GetOperationalDataset::DecodableType & req, const chip::app::ConcreteCommandPath & commandPath);
+    void HandleAddNetworkRequest(CommandHandler & handler, const ThreadNetworkDirectory::Commands::AddNetwork::DecodableType & req,
+                                 const chip::app::ConcreteCommandPath & commandPath);
+    void HandleRemoveNetworkRequest(CommandHandler & handler,
+                                    const ThreadNetworkDirectory::Commands::RemoveNetwork::DecodableType & req,
+                                    const chip::app::ConcreteCommandPath & commandPath);
+    void HandleOperationalDatasetRequest(CommandHandler & handler,
+                                         const ThreadNetworkDirectory::Commands::GetOperationalDataset::DecodableType & req,
+                                         const chip::app::ConcreteCommandPath & commandPath);
 
     ThreadNetworkDirectoryStorage & mStorage;
 };

@@ -38,7 +38,8 @@ class DefaultThreadNetworkDirectoryServer
 public:
     DefaultThreadNetworkDirectoryServer(EndpointId endpoint,
                                         PersistentStorageDelegate & storage = Server::GetInstance().GetPersistentStorage()) :
-                mStorage(storage), mCluster(endpoint, mStorage)
+        mStorage(storage),
+        mCluster(endpoint, mStorage)
     {}
 
     ~DefaultThreadNetworkDirectoryServer();
