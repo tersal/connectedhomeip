@@ -20,7 +20,7 @@ source_set("thread-network-directory-server") {
     "DefaultThreadNetworkDirectoryStorage.h",
     "ThreadNetworkDirectoryCluster.cpp",
     "ThreadNetworkDirectoryCluster.h",
-    "ThreadNetworkDirectoryStorage.h"
+    "ThreadNetworkDirectoryStorage.h",
   ]
 
   public_deps = [
