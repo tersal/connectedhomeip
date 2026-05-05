@@ -299,7 +299,7 @@ TEST_F(TestThreadNetworkDirectoryCluster, TestAddNetworkCommand)
         req.operationalDataset = ByteSpan();
         auto result            = tester.Invoke(req);
         ASSERT_TRUE(result.status.has_value());
-        EXPECT_EQ(result.status->GetStatusCode().GetStatus(), IMStatus::ConstraintError);
+        EXPECT_EQ(result.status.value().GetStatusCode().GetStatus(), IMStatus::ConstraintError);
     }
 
     // Success: add a valid dataset.
@@ -308,7 +308,7 @@ TEST_F(TestThreadNetworkDirectoryCluster, TestAddNetworkCommand)
         req.operationalDataset = ByteSpan(kDataset1);
         auto result            = tester.Invoke(req);
         ASSERT_TRUE(result.status.has_value());
-        EXPECT_EQ(result.status->GetStatusCode().GetStatus(), IMStatus::Success);
+        EXPECT_EQ(result.status.value().GetStatusCode().GetStatus(), IMStatus::Success);
         EXPECT_TRUE(storage.ContainsNetwork(MakeExPanId1()));
     }
 
@@ -318,7 +318,7 @@ TEST_F(TestThreadNetworkDirectoryCluster, TestAddNetworkCommand)
         req.operationalDataset = ByteSpan(kDataset1);
         auto result            = tester.Invoke(req);
         ASSERT_TRUE(result.status.has_value());
-        EXPECT_EQ(result.status->GetStatusCode().GetStatus(), IMStatus::InvalidInState);
+        EXPECT_EQ(result.status.value().GetStatusCode().GetStatus(), IMStatus::InvalidInState);
     }
 
     // Success: update accepted when active timestamp is strictly newer.
@@ -327,7 +327,7 @@ TEST_F(TestThreadNetworkDirectoryCluster, TestAddNetworkCommand)
         req.operationalDataset = ByteSpan(kDataset1Updated);
         auto result            = tester.Invoke(req);
         ASSERT_TRUE(result.status.has_value());
-        EXPECT_EQ(result.status->GetStatusCode().GetStatus(), IMStatus::Success);
+        EXPECT_EQ(result.status.value().GetStatusCode().GetStatus(), IMStatus::Success);
     }
 
     // ResourceExhausted: fill remaining capacity then add one more new network.
