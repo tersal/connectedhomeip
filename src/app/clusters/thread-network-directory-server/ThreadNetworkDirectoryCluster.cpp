@@ -17,7 +17,7 @@
 
 #include <app/clusters/thread-network-directory-server/ThreadNetworkDirectoryCluster.h>
 
- #include <app/MessageDef/StatusIB.h>
+#include <app/MessageDef/StatusIB.h>
 #include <app/SafeAttributePersistenceProvider.h>
 #include <app/data-model/Nullable.h>
 #include <app/reporting/reporting.h>
