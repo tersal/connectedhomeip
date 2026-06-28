@@ -152,8 +152,31 @@ public:
     Protocols::InteractionModel::Status SetMinSetpointDeadbanc(int8_t value);
     int8_t GetMinSetpointDeadbanc();
 
-    void SetThermostatRunningState(BitMask<RelayStateBitmap> value);
+    // RemoteSensing
+    Protocols::InteractionModel::Status SetRemoteSensing(BitMask<RemoteSensingBitmap> value);
+    BitMask<RemoteSensingBitmap> GetRemoteSensing();
+
+    // ControlSequenceOfOperation
+    Protocols::InteractionModel::Status SetControlSequenceOfOperation(ControlSequenceOfOperationEnum value);
+    ControlSequenceOfOperationEnum GetControlSequenceOfOperation();
+
+    // SystemMode
+    Protocols::InteractionModel::Status SetSystemMode(SystemModeEnum value);
+    SystemModeEnum GetSystemMode();
+
+    // ThermostatRunningMode
     void SetThermostatRunningMode(ThermostatRunningModeEnum value);
+    ThermostatRunningModeEnum GetThermostatRunningMode();
+
+    // TemperatureSetpointHold
+    void SetTemperatureSetpointHold(TemperatureSetpointHoldEnum value);
+    TemperatureSetpointHoldEnum GetTemperatureSetpointHold();
+
+    // TemperatureSetpointHoldDuration
+    void SetTemperatureSetpointHoldDuration(DataModel::Nullable<uint16_t> value);
+    DataModel::Nullable<uint16_t> GetTemperatureSetpointHoldDuration();
+
+    void SetThermostatRunningState(BitMask<RelayStateBitmap> value);
 
     // Setters for device-set read-only attributes that do not generate events.
     void SetSetpointChangeSource(SetpointChangeSourceEnum value);
@@ -267,6 +290,9 @@ private:
     Protocols::InteractionModel::Status HandleMinCoolSetpointLimit(int16_t value);
     Protocols::InteractionModel::Status HandleMaxCoolSetpointLimit(int16_t value);
     Protocols::InteractionModel::Status HandleMinSetpointDeadband(int8_t value);
+    Protocols::InteractionModel::Status HandleRemoteSensing(BitMask<RemoteSensingBitmap> value);
+    Protocols::InteractionModel::Status HandleControlSequenceOfOperation(ControlSequenceOfOperationEnum value);
+    Protocols::InteractionModel::Status HandleSystemMode(SystemModeEnum value);
 
     // Sets member to value and, if it changed, persists it to attribute storage. Returns true if changed.
     bool SetAndPersistSetpoint(int16_t & member, int16_t value, AttributeId attributeId);
