@@ -117,8 +117,40 @@ public:
     int8_t GetLocalTemperatureCalibration();
 
     // OccupiedCoolingSetpoint
-    void SetOccupiedCoolingSetpoint(int16_t value);
+    Protocols::InteractionModel::Status SetOccupiedCoolingSetpoint(int16_t value);
     int16_t GetOccupiedCoolingSetpoint();
+
+    // OccupiedHeatingSetpoint
+    Protocols::InteractionModel::Status SetOccupiedHeatingSetpoint(int16_t value);
+    int16_t GetOccupiedHeatingSetpoint();
+
+    // UnoccupiedCoolingSetpoint
+    Protocols::InteractionModel::Status SetUnoccupiedCoolingSetpoint(int16_t value);
+    int16_t GetUnoccupiedCoolingSetpoint();
+
+    // UnoccupiedHeatingSetpoint
+    Protocols::InteractionModel::Status SetUnoccupiedHeatingSetpoint(int16_t value);
+    int16_t GetUnoccupiedHeatingSetpoint();
+
+    // MinHeatSetpointLimit
+    Protocols::InteractionModel::Status SetMinHeatSetpointLimit(int16_t value);
+    int16_t GetMinHeatSetpointLimit();
+
+    // MaxHeatSetpointLimit
+    Protocols::InteractionModel::Status SetMaxHeatSetpointLimit(int16_t value);
+    int16_t GetMaxHeatSetpointLimit();
+
+    // MinCoolSetpointLimit
+    Protocols::InteractionModel::Status SetMinCoolSetpointLimit(int16_t value);
+    int16_t GetMinCoolSetpointLimit();
+
+    // MaxCoolSetpointLimit
+    Protocols::InteractionModel::Status SetMaxCoolSetpointLimit(int16_t value);
+    int16_t GetMaxCoolSetpointLimit();
+
+    // MinSetpointDeadbanc
+    Protocols::InteractionModel::Status SetMinSetpointDeadbanc(int8_t value);
+    int8_t GetMinSetpointDeadbanc();
 
     void SetThermostatRunningState(BitMask<RelayStateBitmap> value);
     void SetThermostatRunningMode(ThermostatRunningModeEnum value);
@@ -228,6 +260,13 @@ private:
     // Post-write side effects for a setpoint attribute (replaces MatterThermostatClusterServerAttributeChangedCallback):
     // shifts the paired setpoint to maintain the deadband, emits change events, and clears the active preset.
     void HandleSetpointPostWrite(AttributeId attributeId);
+    Protocols::InteractionModel::Status HandleOccupancyHeatingSetpoint(int16_t value, AttributeId attributeId);
+    Protocols::InteractionModel::Status HandleOccupancyCoolingSetpoint(int16_t value, AttributeId attributeId);
+    Protocols::InteractionModel::Status HandleMinHeatSetpointLimit(int16_t value);
+    Protocols::InteractionModel::Status HandleMaxHeatSetpointLimit(int16_t value);
+    Protocols::InteractionModel::Status HandleMinCoolSetpointLimit(int16_t value);
+    Protocols::InteractionModel::Status HandleMaxCoolSetpointLimit(int16_t value);
+    Protocols::InteractionModel::Status HandleMinSetpointDeadband(int8_t value);
 
     // Sets member to value and, if it changed, persists it to attribute storage. Returns true if changed.
     bool SetAndPersistSetpoint(int16_t & member, int16_t value, AttributeId attributeId);
@@ -319,17 +358,6 @@ private:
 void SetDefaultDelegate(EndpointId endpoint, Delegate * delegate);
 
 Delegate * GetDelegate(EndpointId endpoint);
-
-// These ember command-callback declarations were removed from the generated headers once the cluster
-// became code-driven; they are still defined in the suggestion source file and invoked (by name)
-// from ThermostatCluster::InvokeCommand.
-bool emberAfThermostatClusterAddThermostatSuggestionCallback(
-    CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
-    const Clusters::Thermostat::Commands::AddThermostatSuggestion::DecodableType & commandData);
-
-bool emberAfThermostatClusterRemoveThermostatSuggestionCallback(
-    CommandHandler * commandObj, const ConcreteCommandPath & commandPath,
-    const Clusters::Thermostat::Commands::RemoveThermostatSuggestion::DecodableType & commandData);
 
 } // namespace Thermostat
 } // namespace Clusters
