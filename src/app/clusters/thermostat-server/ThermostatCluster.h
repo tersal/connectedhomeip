@@ -176,13 +176,58 @@ public:
     void SetTemperatureSetpointHoldDuration(DataModel::Nullable<uint16_t> value);
     DataModel::Nullable<uint16_t> GetTemperatureSetpointHoldDuration();
 
+    // ThermostatRunningState
     void SetThermostatRunningState(BitMask<RelayStateBitmap> value);
+    BitMask<RelayStateBitmap> GetThermostatRunningState();
 
-    // Setters for device-set read-only attributes that do not generate events.
+    // SetpointChangeSource
     void SetSetpointChangeSource(SetpointChangeSourceEnum value);
+    SetpointChangeSourceEnum GetSetpointChangeSource();
+
+    // SetpointChangeAmount
     void SetSetpointChangeAmount(DataModel::Nullable<int16_t> value);
+    DataModel::Nullable<int16_t> GetSetpointChangeAmount();
+
+    // SetpointChangeSourceTimestamp
     void SetSetpointChangeSourceTimestamp(uint32_t value);
+    uint32_t GetSetpointChangeSourceTimestamp();
+
+    // EmergencyHeatDelta
+    void SetEmergencyHeatDelta(uint8_t value);
+    uint8_t GetEmergencyHeatDelta();
+
+    // ACType
+    void SetACType(ACTypeEnum value);
+    ACTypeEnum GetACType();
+
+    // ACCapacity
+    void SetACCapacity(uint16_t value);
+    uint16_t GetACCapacity();
+
+    // ACCapacity
+    void SetACRefrigerantType(ACRefrigerantTypeEnum value);
+    ACRefrigerantTypeEnum GetACRefrigerantType();
+
+    // ACCompressorType
+    void SetACCompressorType(ACCompressorTypeEnum value);
+    ACCompressorTypeEnum GetACCompressorType();
+
+    // ACErrorCode
+    void SetACErrorCode(BitMask<chip::app::Clusters::Thermostat::ACErrorCodeBitmap> value);
+    BitMask<chip::app::Clusters::Thermostat::ACErrorCodeBitmap> GetACErrorCode();
+
+    // ACLouverPosition
+    void SetACLouverPosition(ACLouverPositionEnum value);
+    ACLouverPositionEnum GetACLouverPosition();
+
+    // ACCoilTemperature
     void SetACCoilTemperature(DataModel::Nullable<int16_t> value);
+    DataModel::Nullable<int16_t> GetACCoilTemperature();
+
+    // ACCapacityFormat
+    void SetACCapacityFormat(ACCapacityFormatEnum value);
+    ACCapacityFormatEnum GetACCapacityFormat();
+
     // Handle setters also persist their values across reboots.
     void SetActivePresetHandle(DataModel::Nullable<ByteSpan> value);
     void SetActiveScheduleHandle(DataModel::Nullable<ByteSpan> value);
@@ -331,38 +376,28 @@ private:
     int16_t mMaxHeatSetpointLimit;
     int16_t mMinCoolSetpointLimit;
     int16_t mMaxCoolSetpointLimit;
-    Attributes::MinSetpointDeadBand::TypeInfo::Type mMinSetpointDeadBand;
-    Attributes::RemoteSensing::TypeInfo::Type mRemoteSensing{};
-    Attributes::ControlSequenceOfOperation::TypeInfo::Type mControlSequenceOfOperation;
-    Attributes::SystemMode::TypeInfo::Type mSystemMode;
-    Attributes::ThermostatRunningMode::TypeInfo::Type mThermostatRunningMode{};
-    Attributes::StartOfWeek::TypeInfo::Type mStartOfWeek{};
-    Attributes::NumberOfWeeklyTransitions::TypeInfo::Type mNumberOfWeeklyTransitions{};
-    Attributes::NumberOfDailyTransitions::TypeInfo::Type mNumberOfDailyTransitions{};
-    Attributes::TemperatureSetpointHold::TypeInfo::Type mTemperatureSetpointHold{};
-    Attributes::TemperatureSetpointHoldDuration::TypeInfo::Type mTemperatureSetpointHoldDuration{};
-    Attributes::ThermostatProgrammingOperationMode::TypeInfo::Type mThermostatProgrammingOperationMode{};
-    Attributes::ThermostatRunningState::TypeInfo::Type mThermostatRunningState{};
-    Attributes::SetpointChangeSource::TypeInfo::Type mSetpointChangeSource{};
-    Attributes::SetpointChangeAmount::TypeInfo::Type mSetpointChangeAmount{};
-    Attributes::SetpointChangeSourceTimestamp::TypeInfo::Type mSetpointChangeSourceTimestamp{};
-    Attributes::OccupiedSetback::TypeInfo::Type mOccupiedSetback{};
-    Attributes::OccupiedSetbackMin::TypeInfo::Type mOccupiedSetbackMin{};
-    Attributes::OccupiedSetbackMax::TypeInfo::Type mOccupiedSetbackMax{};
-    Attributes::UnoccupiedSetback::TypeInfo::Type mUnoccupiedSetback{};
-    Attributes::UnoccupiedSetbackMin::TypeInfo::Type mUnoccupiedSetbackMin{};
-    Attributes::UnoccupiedSetbackMax::TypeInfo::Type mUnoccupiedSetbackMax{};
-    Attributes::EmergencyHeatDelta::TypeInfo::Type mEmergencyHeatDelta{};
-    Attributes::ACType::TypeInfo::Type mACType{};
-    Attributes::ACCapacity::TypeInfo::Type mACCapacity{};
-    Attributes::ACRefrigerantType::TypeInfo::Type mACRefrigerantType{};
-    Attributes::ACCompressorType::TypeInfo::Type mACCompressorType{};
-    Attributes::ACErrorCode::TypeInfo::Type mACErrorCode{};
+    int8_t mMinSetpointDeadBand;
+    BitMask<chip::app::Clusters::Thermostat::RemoteSensingBitmap> mRemoteSensing{};
+    ControlSequenceOfOperationEnum mControlSequenceOfOperation;
+    SystemModeEnum mSystemMode;
+    ThermostatRunningModeEnum mThermostatRunningMode{};
+    TemperatureSetpointHoldEnum mTemperatureSetpointHold{};
+    DataModel::Nullable<uint16_t> mTemperatureSetpointHoldDuration{};
+    BitMask<chip::app::Clusters::Thermostat::RelayStateBitmap> mThermostatRunningState{};
+    SetpointChangeSourceEnum mSetpointChangeSource{};
+    DataModel::Nullable<int16_t> mSetpointChangeAmount{};
+    uint32_t mSetpointChangeSourceTimestamp{};
+    uint8_t mEmergencyHeatDelta{};
+    ACTypeEnum mACType{};
+    uint16_t mACCapacity{};
+    ACRefrigerantTypeEnum mACRefrigerantType{};
+    ACCompressorTypeEnum mACCompressorType{};
+    BitMask<chip::app::Clusters::Thermostat::ACErrorCodeBitmap> mACErrorCode{};
     // ACLouverPositionEnum has no 0 value (0 == kUnknownEnumValue, which must never be transmitted), so
     // default to the first valid value rather than {} to avoid emitting a constraint-invalid enum.
-    Attributes::ACLouverPosition::TypeInfo::Type mACLouverPosition{ ACLouverPositionEnum::kClosed };
-    Attributes::ACCoilTemperature::TypeInfo::Type mACCoilTemperature{};
-    Attributes::ACCapacityformat::TypeInfo::Type mACCapacityformat{};
+    ACLouverPositionEnum mACLouverPosition{ ACLouverPositionEnum::kClosed };
+    DataModel::Nullable<int16_t> mACCoilTemperature{};
+    ACCapacityFormatEnum mACCapacityFormat{};
     Attributes::NumberOfSchedules::TypeInfo::Type mNumberOfSchedules{};
     Attributes::NumberOfScheduleTransitions::TypeInfo::Type mNumberOfScheduleTransitions{};
     Attributes::NumberOfScheduleTransitionPerDay::TypeInfo::Type mNumberOfScheduleTransitionPerDay{};
